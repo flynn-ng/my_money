@@ -203,6 +203,24 @@ class S {
   static String get categoryTypeExpense => _t('Chi tiêu', 'Expense');
   static String get categoryTypeBoth => _t('Cả hai', 'Both');
 
+  // Avatar picker
+  static String get avatarPickerTitle => _t('Chọn avatar', 'Choose avatar');
+
+  // Household switcher
+  static String get switchHouseholdTitle => _t('Chuyển hộ gia đình', 'Switch household');
+  static String get leaveHousehold => _t('Rời khỏi', 'Leave');
+  static String get leaveHouseholdTitle => _t('Rời khỏi hộ gia đình?', 'Leave household?');
+  static String leaveHouseholdContent(String name) => _t(
+        'Bạn sẽ không còn truy cập dữ liệu của "$name".',
+        'You will lose access to "$name" data.',
+      );
+  static String get joinAnotherHousehold =>
+      _t('Tham gia hộ gia đình khác', 'Join another household');
+  static String get createNewHousehold =>
+      _t('Tạo hộ gia đình mới', 'Create new household');
+  static String get activeHousehold => _t('Đang hoạt động', 'Active');
+  static String get householdSwitchRow => _t('Hộ gia đình', 'Household');
+
   // Common
   static String get retry => _t('Thử lại', 'Retry');
   static String get cancel => _t('Huỷ', 'Cancel');

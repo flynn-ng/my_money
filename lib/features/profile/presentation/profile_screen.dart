@@ -11,6 +11,8 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/profile_model.dart';
+import '../../household/presentation/widgets/household_switcher_sheet.dart';
+import 'widgets/avatar_picker_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -79,18 +81,50 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   padding: EdgeInsets.fromLTRB(hPad(context), 20, hPad(context), 8),
                   child: Row(
                     children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              color: AppColors.divider, width: 1.5),
+                      GestureDetector(
+                        onTap: () => AvatarPickerSheet.show(
+                          context,
+                          currentEmoji: profile.avatarEmoji,
+                          onSelect: (emoji) async {
+                            await ref
+                                .read(authRepositoryProvider)
+                                .updateAvatarEmoji(profile.id, emoji);
+                            ref.invalidate(currentProfileProvider);
+                          },
                         ),
-                        alignment: Alignment.center,
-                        child: Text(profile.avatarEmoji,
-                            style: const TextStyle(fontSize: 28)),
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: AppColors.divider, width: 1.5),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(profile.avatarEmoji,
+                                  style: const TextStyle(fontSize: 28)),
+                            ),
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: AppColors.black,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: AppColors.surface, width: 1.5),
+                                ),
+                                child: const Icon(Icons.edit,
+                                    size: 11, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -189,11 +223,24 @@ class _SettingsTab extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
 
+    final householdsAsync = ref.watch(myHouseholdsProvider);
+
     return ListView(
       padding: EdgeInsets.fromLTRB(hPad(context), 20, hPad(context), 32),
       children: [
         _Card(
           children: [
+            _Row(
+              icon: Icons.home_outlined,
+              label: S.householdSwitchRow,
+              value: householdsAsync.when(
+                loading: () => '',
+                error: (_, _) => '',
+                data: (hs) => hs.length > 1 ? '${hs.length}' : '',
+              ),
+              onTap: () => HouseholdSwitcherSheet.show(context),
+            ),
+            const _Divider(),
             _Row(
               icon: Icons.category_outlined,
               label: S.manageCategories,

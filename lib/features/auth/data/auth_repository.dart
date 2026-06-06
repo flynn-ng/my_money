@@ -43,10 +43,22 @@ class AuthRepository {
     return ProfileModel.fromJson(data);
   }
 
+  Future<void> updateAvatarEmoji(String userId, String emoji) async {
+    await _client
+        .from(tableProfiles)
+        .update({'avatar_emoji': emoji})
+        .eq('id', userId);
+  }
+
   Future<HouseholdModel> createHousehold(String userId) async {
     final result = await _client
         .rpc('create_household_for_user', params: {'user_id': userId});
-    return HouseholdModel.fromJson(result as Map<String, dynamic>);
+    final model = HouseholdModel.fromJson(result as Map<String, dynamic>);
+    await _client.from(tableProfileHouseholdMemberships).upsert({
+      'profile_id': userId,
+      'household_id': model.id,
+    });
+    return model;
   }
 
   Future<HouseholdModel?> getHousehold(String id) async {
@@ -93,7 +105,42 @@ class AuthRepository {
         .from(tableProfiles)
         .update({'household_id': model.id})
         .eq('id', userId);
+    await _client.from(tableProfileHouseholdMemberships).upsert({
+      'profile_id': userId,
+      'household_id': model.id,
+    });
     return model;
+  }
+
+  Future<List<HouseholdModel>> getMyHouseholds(String userId) async {
+    final data = await _client
+        .from(tableProfileHouseholdMemberships)
+        .select('household_id, households(*)')
+        .eq('profile_id', userId);
+    return (data as List)
+        .map((e) => HouseholdModel.fromJson(e['households'] as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> switchHousehold(String userId, String householdId) async {
+    await _client
+        .from(tableProfiles)
+        .update({'household_id': householdId})
+        .eq('id', userId);
+  }
+
+  Future<void> leaveHousehold(String userId, String householdId) async {
+    await _client
+        .from(tableProfileHouseholdMemberships)
+        .delete()
+        .eq('profile_id', userId)
+        .eq('household_id', householdId);
+    // If this was the active household, clear it (router redirects to /household-link)
+    await _client
+        .from(tableProfiles)
+        .update({'household_id': null})
+        .eq('id', userId)
+        .eq('household_id', householdId);
   }
 }
 
@@ -122,4 +169,10 @@ final householdMembersProvider = FutureProvider<List<ProfileModel>>((ref) async 
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) return [];
   return ref.watch(authRepositoryProvider).getHouseholdMembers(profile!.householdId!);
+});
+
+final myHouseholdsProvider = FutureProvider<List<HouseholdModel>>((ref) async {
+  final profile = await ref.watch(currentProfileProvider.future);
+  if (profile == null) return [];
+  return ref.watch(authRepositoryProvider).getMyHouseholds(profile.id);
 });
