@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
+import '../constants/app_theme.dart';
 
 /// Consistent wrapper for all modal bottom sheet content.
 /// Provides cream background, rounded top corners, and a drag handle pill.
@@ -10,9 +10,9 @@ class SheetWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.cream,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: context.colors.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -36,7 +36,7 @@ class _DragHandle extends StatelessWidget {
         width: 36,
         height: 4,
         decoration: BoxDecoration(
-          color: AppColors.divider,
+          color: context.colors.divider,
           borderRadius: BorderRadius.circular(2),
         ),
       ),

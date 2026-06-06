@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
@@ -170,7 +171,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.close),
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                     onPressed: () => context.pop(),
                   ),
                   const Spacer(),
@@ -178,7 +179,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: AppColors.cream,
+                      color: context.colors.background,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -320,7 +321,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
-                        color: AppColors.cream,
+                        color: context.colors.background,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(

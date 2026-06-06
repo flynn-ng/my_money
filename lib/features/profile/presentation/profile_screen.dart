@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
+import '../data/theme_provider.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
@@ -62,7 +64,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final email = authAsync.value?.session?.user.email ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -177,12 +179,17 @@ class _ProfileTab extends StatelessWidget {
 
 // ── Settings tab ─────────────────────────────────────────────────────────────
 
-class _SettingsTab extends StatelessWidget {
+class _SettingsTab extends ConsumerWidget {
   final VoidCallback onSignOut;
   const _SettingsTab({required this.onSignOut});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
     return ListView(
       padding: EdgeInsets.fromLTRB(hPad(context), 20, hPad(context), 32),
       children: [
@@ -193,6 +200,14 @@ class _SettingsTab extends StatelessWidget {
               label: S.manageCategories,
               value: '',
               onTap: () => context.push('/categories'),
+            ),
+            const _Divider(),
+            _SwitchRow(
+              icon: Icons.dark_mode_outlined,
+              label: S.darkMode,
+              value: isDark,
+              onChanged: (v) => ref.read(themeModeProvider.notifier).set(
+                  v ? ThemeMode.dark : ThemeMode.light),
             ),
             const _Divider(),
             _Row(
@@ -256,16 +271,43 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-              color: AppColors.cardShadow,
+              color: context.colors.cardShadow,
               blurRadius: 6,
-              offset: Offset(0, 2)),
+              offset: const Offset(0, 2)),
         ],
       ),
       child: Column(children: children),
+    );
+  }
+}
+
+class _SwitchRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _SwitchRow({required this.icon, required this.label, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: context.colors.textSecondary),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label, style: AppTextStyles.bodyMedium.copyWith(color: context.colors.textPrimary))),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: AppColors.black,
+          ),
+        ],
+      ),
     );
   }
 }

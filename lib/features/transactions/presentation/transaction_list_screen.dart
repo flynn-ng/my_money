@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/currency_ext.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -59,10 +60,10 @@ class _SummaryBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: Offset(0, 2))
+          boxShadow: [
+            BoxShadow(color: context.colors.cardShadow, blurRadius: 8, offset: const Offset(0, 2))
           ],
         ),
         child: Row(

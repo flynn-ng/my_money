@@ -112,6 +112,7 @@ class S {
   static const settingsAppVersion = 'Phiên bản';
   static const settingsAbout = 'Về ứng dụng';
   static const appVersionValue = '1.0.0';
+  static const darkMode = 'Chế độ tối';
 
   // Household screen
   static const householdMembers = 'Thành viên';

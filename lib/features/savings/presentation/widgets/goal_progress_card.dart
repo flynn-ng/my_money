@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_theme.dart';
 import '../../../../core/extensions/currency_ext.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/utils/responsive.dart';
@@ -28,10 +29,10 @@ class GoalProgressCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: hPad(context), vertical: 6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: Offset(0, 2))
+        boxShadow: [
+          BoxShadow(color: context.colors.cardShadow, blurRadius: 8, offset: const Offset(0, 2))
         ],
       ),
       child: Column(
@@ -58,7 +59,7 @@ class GoalProgressCard extends StatelessWidget {
                               ? AppColors.red
                               : daysLeft <= 7
                                   ? Colors.orange
-                                  : AppColors.textSecondary,
+                                  : context.colors.textSecondary,
                         ),
                       ),
                   ],
@@ -71,8 +72,8 @@ class GoalProgressCard extends StatelessWidget {
                   onPressed: onContribute,
                 ),
               IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    color: AppColors.textSecondary, size: 20),
+                icon: Icon(Icons.delete_outline,
+                    color: context.colors.textSecondary, size: 20),
                 onPressed: onDelete,
               ),
             ],
@@ -96,7 +97,7 @@ class GoalProgressCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 10,
-                  backgroundColor: AppColors.divider,
+                  backgroundColor: context.colors.divider,
                   valueColor: AlwaysStoppedAnimation(
                       goal.isCompleted ? AppColors.green : AppColors.amber),
                 ),

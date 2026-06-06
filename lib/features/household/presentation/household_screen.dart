@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart' show Share;
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/loading_overlay.dart';
@@ -17,7 +18,7 @@ class HouseholdPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,9 +276,9 @@ class _MemberTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.colors.surface,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.divider, width: 1),
+              border: Border.all(color: context.colors.divider, width: 1),
             ),
             alignment: Alignment.center,
             child: Text(profile.avatarEmoji,
@@ -291,7 +292,7 @@ class _MemberTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.divider),
               ),
@@ -320,7 +321,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
@@ -357,11 +358,11 @@ class _InviteBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider),
-        boxShadow: const [
-          BoxShadow(color: AppColors.cardShadow, blurRadius: 6, offset: Offset(0, 2)),
+        boxShadow: [
+          BoxShadow(color: context.colors.cardShadow, blurRadius: 6, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -402,7 +403,7 @@ class _TinyButton extends StatelessWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: context.colors.background,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 16, color: AppColors.textSecondary),

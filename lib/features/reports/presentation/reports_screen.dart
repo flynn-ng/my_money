@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
@@ -24,7 +25,7 @@ class ReportsScreen extends ConsumerWidget {
     final last6Async = ref.watch(last6MonthsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.amber,

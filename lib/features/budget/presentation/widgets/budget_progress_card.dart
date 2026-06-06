@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_theme.dart';
 import '../../../../core/extensions/currency_ext.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/utils/responsive.dart';
@@ -25,10 +26,10 @@ class BudgetProgressCard extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: hPad(context), vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: Offset(0, 2))
+          boxShadow: [
+            BoxShadow(color: context.colors.cardShadow, blurRadius: 8, offset: const Offset(0, 2))
           ],
         ),
         child: Column(
@@ -69,7 +70,7 @@ class BudgetProgressCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 8,
-                backgroundColor: AppColors.divider,
+                backgroundColor: context.colors.divider,
                 valueColor: AlwaysStoppedAnimation(color),
               ),
             ),
@@ -85,7 +86,7 @@ class BudgetProgressCard extends StatelessWidget {
                       : '${(-budget.remaining).asCurrency} ${S.budgetOver}',
                   style: AppTextStyles.labelSmall.copyWith(
                       color: budget.remaining >= 0
-                          ? AppColors.textSecondary
+                          ? context.colors.textSecondary
                           : AppColors.red),
                 ),
               ],

@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
@@ -87,7 +88,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.close),
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
                 onPressed: () => context.pop(),
               ),
             ],

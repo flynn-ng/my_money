@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_theme.dart';
 import '../../../reports/data/reports_repository.dart';
 
 class MonthlyBarChart extends StatelessWidget {
@@ -58,7 +59,7 @@ class MonthlyBarChart extends StatelessWidget {
           gridData: FlGridData(
             drawVerticalLine: false,
             getDrawingHorizontalLine: (_) =>
-                const FlLine(color: AppColors.divider, strokeWidth: 1),
+                FlLine(color: context.colors.divider, strokeWidth: 1),
           ),
           borderData: FlBorderData(show: false),
         ),

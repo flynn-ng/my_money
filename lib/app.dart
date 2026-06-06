@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_text_styles.dart';
+import 'core/constants/app_theme.dart';
 import 'core/l10n/app_strings.dart';
 import 'core/widgets/sheet_wrapper.dart';
 import 'features/auth/data/auth_repository.dart';
@@ -15,6 +16,7 @@ import 'features/budget/presentation/set_budget_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/household/presentation/household_screen.dart' show HouseholdPage;
 import 'features/transactions/presentation/category_management_screen.dart';
+import 'features/profile/data/theme_provider.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/reports/presentation/reports_screen.dart';
 import 'features/savings/presentation/add_goal_screen.dart';
@@ -163,12 +165,15 @@ class _AppShellState extends ConsumerState<_AppShell> {
   }
 
   Widget _buildNavBar(BuildContext context, int currentIndex) {
+    final hasFab = currentIndex == 0;
     return BottomAppBar(
       height: 64,
       padding: EdgeInsets.zero,
-      color: Colors.white,
+      color: context.colors.surface,
       elevation: 8,
       shadowColor: Colors.black12,
+      shape: hasFab ? const CircularNotchedRectangle() : null,
+      notchMargin: hasFab ? 8 : 0,
       child: Row(
         children: [
           Expanded(
@@ -189,6 +194,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
               onTap: () => context.go('/reports'),
             ),
           ),
+          if (hasFab) const SizedBox(width: 72),
           Expanded(
             child: _NavItem(
               icon: Icons.people_outline,
@@ -265,7 +271,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
         ),
       ),
       floatingActionButton: _buildFab(context, currentIndex, financeTab),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _buildNavBar(context, currentIndex),
     );
   }
@@ -339,9 +345,68 @@ class _LoadingScreen extends StatelessWidget {
 class MyMoneyApp extends ConsumerWidget {
   const MyMoneyApp({super.key});
 
+  static ThemeData _buildTheme({required bool dark}) {
+    final bg = dark ? AppThemeColors.dark.background : AppThemeColors.light.background;
+    final surface = dark ? AppThemeColors.dark.surface : AppThemeColors.light.surface;
+    final onSurface = dark ? AppThemeColors.dark.textPrimary : AppThemeColors.light.textPrimary;
+    final divider = dark ? AppThemeColors.dark.divider : AppThemeColors.light.divider;
+
+    return ThemeData(
+      brightness: dark ? Brightness.dark : Brightness.light,
+      colorScheme: dark
+          ? ColorScheme.dark(
+              primary: Colors.white,
+              onPrimary: AppColors.black,
+              secondary: const Color(0xFFE5E5E5),
+              onSecondary: AppColors.black,
+              surface: surface,
+              onSurface: onSurface,
+            )
+          : const ColorScheme.light(
+              primary: AppColors.black,
+              onPrimary: Colors.white,
+              secondary: AppColors.blackSoft,
+              onSecondary: Colors.white,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
+      scaffoldBackgroundColor: bg,
+      dividerColor: divider,
+      useMaterial3: true,
+      splashColor: dark ? Colors.white12 : Colors.black12,
+      highlightColor: dark
+          ? Colors.white.withValues(alpha: 0.06)
+          : Colors.black.withValues(alpha: 0.06),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: dark ? Colors.white : AppColors.black, width: 1.5),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: dark ? Colors.white : AppColors.black,
+          foregroundColor: dark ? AppColors.black : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
       title: 'My Moneyyy!!!',
       debugShowCheckedModeBanner: false,
@@ -352,44 +417,9 @@ class MyMoneyApp extends ConsumerWidget {
       ],
       supportedLocales: const [Locale('vi'), Locale('en')],
       locale: const Locale('vi'),
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light(
-          primary: AppColors.black,
-          onPrimary: Colors.white,
-          secondary: AppColors.blackSoft,
-          onSecondary: Colors.white,
-          surface: AppColors.surface,
-          onSurface: AppColors.textPrimary,
-        ),
-        scaffoldBackgroundColor: AppColors.background,
-        useMaterial3: true,
-        splashColor: Colors.black12,
-        highlightColor: Colors.black.withValues(alpha: 0.06),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.black, width: 1.5),
-          ),
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.black,
-            foregroundColor: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-        ),
-      ),
+      theme: _buildTheme(dark: false),
+      darkTheme: _buildTheme(dark: true),
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

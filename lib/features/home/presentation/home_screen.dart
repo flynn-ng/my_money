@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -55,19 +56,19 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
     final month = ref.watch(selectedMonthProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
             // ── Tab bar ───────────────────────────────────────────
             Container(
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.divider)),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: context.colors.divider)),
               ),
               child: TabBar(
                 controller: _tabController,
-                labelColor: AppColors.black,
-                unselectedLabelColor: AppColors.textSecondary,
+                labelColor: context.colors.textPrimary,
+                unselectedLabelColor: context.colors.textSecondary,
                 indicatorColor: AppColors.black,
                 indicatorWeight: 2,
                 labelStyle: AppTextStyles.bodyMedium
@@ -94,8 +95,8 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
             ),
             // ── Month navigator (bottom, thumb-friendly) ──────────
             Container(
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.divider)),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: context.colors.divider)),
               ),
               padding: EdgeInsets.fromLTRB(hPad(context), 4, 8, 4),
               child: Row(

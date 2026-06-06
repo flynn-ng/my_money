@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_theme.dart';
 import '../../../../core/extensions/currency_ext.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/utils/responsive.dart';
@@ -107,13 +108,13 @@ class _TransactionTileState extends State<TransactionTile> {
             margin: EdgeInsets.symmetric(horizontal: hPad(context), vertical: 3),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.colors.surface,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   color: _pressed
-                      ? AppColors.cardShadow.withValues(alpha: 0.04)
-                      : AppColors.cardShadow,
+                      ? context.colors.cardShadow.withValues(alpha: 0.04)
+                      : context.colors.cardShadow,
                   blurRadius: _pressed ? 2 : 6,
                   offset: const Offset(0, 1),
                 ),
@@ -159,9 +160,9 @@ class _TransactionTileState extends State<TransactionTile> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.surface,
+                              color: context.colors.background,
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppColors.divider),
+                              border: Border.all(color: context.colors.divider),
                             ),
                             child: Text(
                               tx.paidByName!,

@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/thousands_formatter.dart';
@@ -61,9 +62,9 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.cream,
+        backgroundColor: context.colors.background,
         elevation: 0,
         title: Text(widget.goal.name, style: AppTextStyles.titleMedium),
         leading: CloseButton(color: AppColors.textPrimary),

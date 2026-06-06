@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/responsive.dart';
@@ -75,7 +76,7 @@ class _CategoryManagementScreenState
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -177,11 +178,11 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-              color: AppColors.cardShadow, blurRadius: 6, offset: Offset(0, 2)),
+              color: context.colors.cardShadow, blurRadius: 6, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -363,8 +364,8 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
     ).colorValue;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.cream,
+      decoration: BoxDecoration(
+        color: context.colors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
@@ -380,7 +381,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
               child: Container(
                 width: 36, height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.divider,
+                  color: context.colors.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -398,7 +399,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
