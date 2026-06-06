@@ -1,0 +1,13 @@
+#!/bin/sh
+# Shim: make every file/directory argument writable before codesigning.
+# Needed because Flutter copies frameworks from the Nix store (read-only)
+# and then tries to re-sign them; without this the codesign step fails.
+for a in "$@"; do
+    if [ -f "$a" ]; then
+        chmod -R u+w "$(dirname "$a")" 2>/dev/null || true
+        chmod u+w "$a" 2>/dev/null || true
+    elif [ -d "$a" ]; then
+        chmod -R u+w "$a" 2>/dev/null || true
+    fi
+done
+exec /usr/bin/codesign "$@"

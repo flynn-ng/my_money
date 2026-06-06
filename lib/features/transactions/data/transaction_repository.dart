@@ -1,0 +1,136 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/constants/supabase_constants.dart';
+import '../../../core/providers/supabase_provider.dart';
+import '../../auth/data/auth_repository.dart';
+import 'category_model.dart';
+import 'transaction_model.dart';
+
+class TransactionRepository {
+  final SupabaseClient _client;
+  TransactionRepository(this._client);
+
+  Future<List<TransactionModel>> getTransactionsForDateRange(
+      String householdId, DateTime from, DateTime to) async {
+    final fromStr = '${from.year}-${from.month.toString().padLeft(2, '0')}-01';
+    final toStr = DateTime(to.year, to.month + 1, 0).toIso8601String().substring(0, 10);
+    final data = await _client
+        .from(tableTransactions)
+        .select('*, categories(*), profiles(display_name)')
+        .eq('household_id', householdId)
+        .gte('date', fromStr)
+        .lte('date', toStr)
+        .order('date', ascending: false);
+    return data.map((r) => TransactionModel.fromJson(r)).toList();
+  }
+
+  Future<List<TransactionModel>> getTransactionsForMonth(
+      String householdId, DateTime month) async {
+    final from = DateTime(month.year, month.month, 1).toIso8601String().substring(0, 10);
+    final to = DateTime(month.year, month.month + 1, 0).toIso8601String().substring(0, 10);
+    final data = await _client
+        .from(tableTransactions)
+        .select('*, categories(*), profiles(display_name)')
+        .eq('household_id', householdId)
+        .gte('date', from)
+        .lte('date', to)
+        .order('date', ascending: false);
+    return data.map((r) => TransactionModel.fromJson(r)).toList();
+  }
+
+  Future<void> addTransaction(TransactionModel tx) async {
+    await _client.from(tableTransactions).insert(tx.toInsertJson());
+  }
+
+  Future<void> updateTransaction(String id, Map<String, dynamic> updates) async {
+    await _client.from(tableTransactions).update(updates).eq('id', id);
+  }
+
+  Future<void> deleteTransaction(String id) async {
+    await _client.from(tableTransactions).delete().eq('id', id);
+  }
+
+  Future<List<CategoryModel>> getCategories(String householdId) async {
+    final data = await _client
+        .from(tableCategories)
+        .select()
+        .eq('household_id', householdId)
+        .order('sort_order');
+    return data.map((r) => CategoryModel.fromJson(r)).toList();
+  }
+
+  Future<CategoryModel> createCategory({
+    required String householdId,
+    required String name,
+    required String icon,
+    required String color,
+    required String type,
+    required int sortOrder,
+  }) async {
+    final data = await _client.from(tableCategories).insert({
+      'household_id': householdId,
+      'name': name,
+      'icon': icon,
+      'color': color,
+      'type': type,
+      'sort_order': sortOrder,
+    }).select().single();
+    return CategoryModel.fromJson(data);
+  }
+
+  Future<void> updateCategory(
+    String id, {
+    required String name,
+    required String icon,
+    required String color,
+    required String type,
+  }) async {
+    await _client.from(tableCategories).update({
+      'name': name,
+      'icon': icon,
+      'color': color,
+      'type': type,
+    }).eq('id', id);
+  }
+
+  Future<void> deleteCategory(String id) async {
+    await _client.from(tableCategories).delete().eq('id', id);
+  }
+}
+
+final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
+  return TransactionRepository(ref.watch(supabaseClientProvider));
+});
+
+final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) async {
+  final profile = await ref.watch(currentProfileProvider.future);
+  if (profile?.householdId == null) return [];
+  return ref
+      .watch(transactionRepositoryProvider)
+      .getCategories(profile!.householdId!);
+});
+
+class SelectedMonthNotifier extends Notifier<DateTime> {
+  @override
+  DateTime build() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, 1);
+  }
+
+  void previousMonth() => state = DateTime(state.year, state.month - 1);
+  void nextMonth() => state = DateTime(state.year, state.month + 1);
+  void set(DateTime month) => state = month;
+}
+
+final selectedMonthProvider =
+    NotifierProvider<SelectedMonthNotifier, DateTime>(SelectedMonthNotifier.new);
+
+final transactionsProvider =
+    FutureProvider<List<TransactionModel>>((ref) async {
+  final profile = await ref.watch(currentProfileProvider.future);
+  if (profile?.householdId == null) return [];
+  final month = ref.watch(selectedMonthProvider);
+  return ref
+      .watch(transactionRepositoryProvider)
+      .getTransactionsForMonth(profile!.householdId!, month);
+});

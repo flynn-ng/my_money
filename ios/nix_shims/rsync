@@ -1,0 +1,3 @@
+#!/bin/sh
+# Use Nix rsync 3.4.1 which supports --chmod (macOS openrsync 2.6.9 ignores it)
+exec /nix/store/b3q1xr47mfzf7qza4550mgqvdhaqmy3p-rsync-3.4.1/bin/rsync "$@"
