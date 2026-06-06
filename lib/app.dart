@@ -13,6 +13,7 @@ import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
 import 'features/budget/presentation/set_budget_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/household/presentation/household_screen.dart' show HouseholdPage;
 import 'features/transactions/presentation/category_management_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/reports/presentation/reports_screen.dart';
@@ -92,6 +93,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 const NoTransitionPage(child: ReportsScreen()),
           ),
           GoRoute(
+            path: '/household',
+            pageBuilder: (ctx, st) =>
+                const NoTransitionPage(child: HouseholdPage()),
+          ),
+          GoRoute(
             path: '/profile',
             pageBuilder: (ctx, st) =>
                 const NoTransitionPage(child: ProfileScreen()),
@@ -114,11 +120,12 @@ class _AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<_AppShell> {
   int _prevIndex = 0;
 
-  static const _tabs = ['/home', '/reports', '/profile'];
+  static const _tabs = ['/home', '/reports', '/household', '/profile'];
 
   int _indexForLocation(String location) {
     if (location.startsWith('/reports')) return 1;
-    if (location.startsWith('/profile')) return 2;
+    if (location.startsWith('/household')) return 2;
+    if (location.startsWith('/profile')) return 3;
     return 0;
   }
 
@@ -156,47 +163,52 @@ class _AppShellState extends ConsumerState<_AppShell> {
   }
 
   Widget _buildNavBar(BuildContext context, int currentIndex) {
-    final hasFab = currentIndex == 0;
-    final navItems = [
-      Expanded(
-        child: _NavItem(
-          icon: Icons.wallet_outlined,
-          selectedIcon: Icons.wallet,
-          label: S.tabHome,
-          selected: currentIndex == 0,
-          onTap: () => context.go('/home'),
-        ),
-      ),
-      Expanded(
-        child: _NavItem(
-          icon: Icons.bar_chart_outlined,
-          selectedIcon: Icons.bar_chart,
-          label: S.tabReports,
-          selected: currentIndex == 1,
-          onTap: () => context.go('/reports'),
-        ),
-      ),
-      if (hasFab) const SizedBox(width: 72),
-      Expanded(
-        child: _NavItem(
-          icon: Icons.person_outline,
-          selectedIcon: Icons.person,
-          label: S.tabProfile,
-          selected: currentIndex == 2,
-          onTap: () => context.go('/profile'),
-        ),
-      ),
-    ];
-
     return BottomAppBar(
       height: 64,
       padding: EdgeInsets.zero,
       color: Colors.white,
       elevation: 8,
       shadowColor: Colors.black12,
-      shape: hasFab ? const CircularNotchedRectangle() : null,
-      notchMargin: hasFab ? 8 : 0,
-      child: Row(children: navItems),
+      child: Row(
+        children: [
+          Expanded(
+            child: _NavItem(
+              icon: Icons.wallet_outlined,
+              selectedIcon: Icons.wallet,
+              label: S.tabHome,
+              selected: currentIndex == 0,
+              onTap: () => context.go('/home'),
+            ),
+          ),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.bar_chart_outlined,
+              selectedIcon: Icons.bar_chart,
+              label: S.tabReports,
+              selected: currentIndex == 1,
+              onTap: () => context.go('/reports'),
+            ),
+          ),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.people_outline,
+              selectedIcon: Icons.people,
+              label: S.tabHousehold,
+              selected: currentIndex == 2,
+              onTap: () => context.go('/household'),
+            ),
+          ),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.person_outline,
+              selectedIcon: Icons.person,
+              label: S.tabProfile,
+              selected: currentIndex == 3,
+              onTap: () => context.go('/profile'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -253,7 +265,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
         ),
       ),
       floatingActionButton: _buildFab(context, currentIndex, financeTab),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _buildNavBar(context, currentIndex),
     );
   }

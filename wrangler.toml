@@ -1,5 +1,6 @@
 name = "de-money"
 compatibility_date = "2026-06-06"
+preview_urls = false
 
 [assets]
 directory = "./build/web"

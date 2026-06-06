@@ -80,13 +80,28 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
                 ],
               ),
             ),
-            // ── Month header ──────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.fromLTRB(hPad(context), 10, 8, 4),
+            // ── Tab content ───────────────────────────────────────
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: const [
+                  TransactionListBody(),
+                  BudgetBody(),
+                  SavingsBody(),
+                ],
+              ),
+            ),
+            // ── Month navigator (bottom, thumb-friendly) ──────────
+            Container(
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.divider)),
+              ),
+              padding: EdgeInsets.fromLTRB(hPad(context), 4, 8, 4),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(month.monthYear, style: AppTextStyles.titleLarge)
+                    child: Text(month.monthYear, style: AppTextStyles.titleMedium)
                         .animate(key: ValueKey(month))
                         .fadeIn(duration: 200.ms)
                         .slideX(begin: -0.05),
@@ -103,18 +118,6 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
                         : () =>
                             ref.read(selectedMonthProvider.notifier).nextMonth(),
                   ),
-                ],
-              ),
-            ),
-            // ── Tab content ───────────────────────────────────────
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: const [
-                  TransactionListBody(),
-                  BudgetBody(),
-                  SavingsBody(),
                 ],
               ),
             ),

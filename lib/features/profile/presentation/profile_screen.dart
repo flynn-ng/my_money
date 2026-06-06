@@ -8,7 +8,6 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/profile_model.dart';
-import '../../household/presentation/household_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -24,7 +23,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -125,7 +124,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 unselectedLabelStyle: AppTextStyles.bodyMedium,
                 tabs: const [
                   Tab(text: S.tabProfile),
-                  Tab(text: S.tabHousehold),
                   Tab(text: S.tabSettings),
                 ],
               ),
@@ -136,7 +134,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 controller: _tabController,
                 children: [
                   _ProfileTab(profileAsync: profileAsync),
-                  const HouseholdScreen(),
                   _SettingsTab(onSignOut: _signOut),
                 ],
               ),

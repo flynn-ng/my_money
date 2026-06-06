@@ -10,7 +10,31 @@ import '../../../core/widgets/loading_overlay.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/profile_model.dart';
 
-/// Embeds as a tab inside ProfileScreen (no Scaffold wrapper).
+/// Full-page wrapper used as a bottom-nav destination.
+class HouseholdPage extends StatelessWidget {
+  const HouseholdPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(hPad(context), 20, hPad(context), 8),
+              child: Text(S.tabHousehold, style: AppTextStyles.titleLarge),
+            ),
+            const Expanded(child: HouseholdScreen()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Embeds as a scrollable body (no Scaffold wrapper).
 class HouseholdScreen extends ConsumerStatefulWidget {
   const HouseholdScreen({super.key});
 
@@ -222,17 +246,17 @@ class _MemberTile extends StatelessWidget {
   Future<void> _confirmRemove(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text(S.removeMemberTitle),
         content: Text(S.removeMemberContent(profile.displayName)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(ctx, false),
             child: const Text(S.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(ctx, true),
             child: const Text(S.removeMember),
           ),
         ],
