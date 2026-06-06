@@ -32,7 +32,7 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
   Future<void> _submit() async {
     if (_selectedCategory == null && widget.existing == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(S.selectCategory)),
+        SnackBar(content: Text(S.selectCategory)),
       );
       return;
     }
@@ -134,9 +134,9 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
               key: _formKey,
               child: FormBuilderTextField(
                 name: 'amount',
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: S.monthlyLimit,
-                  prefixIcon: Icon(Icons.payments_outlined),
+                  prefixIcon: const Icon(Icons.payments_outlined),
                 ),
                 initialValue: widget.existing?.amount.toStringAsFixed(0),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -161,8 +161,8 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
                   ? const SizedBox(
                       height: 20, width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text(S.save,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  : Text(S.save,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),
           ],
         ),

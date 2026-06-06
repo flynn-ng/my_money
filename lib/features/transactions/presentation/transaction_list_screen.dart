@@ -151,7 +151,7 @@ class _EmptyView extends StatelessWidget {
           FilledButton.icon(
             onPressed: () => AddTransactionScreen.show(context),
             icon: const Icon(Icons.add),
-            label: const Text(S.addTransaction),
+            label: Text(S.addTransaction),
             style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
           ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
         ],

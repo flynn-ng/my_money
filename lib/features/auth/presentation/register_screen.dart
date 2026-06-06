@@ -68,15 +68,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     FormBuilderTextField(
                       name: 'name',
-                      decoration: const InputDecoration(
-                          labelText: S.yourName, prefixIcon: Icon(Icons.person_outline)),
+                      decoration: InputDecoration(
+                          labelText: S.yourName, prefixIcon: const Icon(Icons.person_outline)),
                       validator: FormBuilderValidators.required(),
                     ),
                     const Gap(12),
                     FormBuilderTextField(
                       name: 'email',
-                      decoration: const InputDecoration(
-                          labelText: S.email, prefixIcon: Icon(Icons.email_outlined)),
+                      decoration: InputDecoration(
+                          labelText: S.email, prefixIcon: const Icon(Icons.email_outlined)),
                       keyboardType: TextInputType.emailAddress,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
@@ -117,8 +117,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ? const SizedBox(
                         height: 20, width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text(S.createAccount,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    : Text(S.createAccount,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ),
               const Gap(8),
               TextButton(

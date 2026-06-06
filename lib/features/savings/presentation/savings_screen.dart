@@ -31,7 +31,7 @@ class SavingsBody extends ConsumerWidget {
             action: FilledButton.icon(
               onPressed: () => AddGoalScreen.show(context),
               icon: const Icon(Icons.add),
-              label: const Text(S.addGoal),
+              label: Text(S.addGoal),
               style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
             ),
           );
@@ -58,16 +58,16 @@ class SavingsBody extends ConsumerWidget {
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (_) => AlertDialog(
-                  title: const Text(S.deleteGoalTitle),
+                  title: Text(S.deleteGoalTitle),
                   content: Text(S.deleteGoalContent(goals[i].name)),
                   actions: [
                     TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text(S.cancel)),
+                        child: Text(S.cancel)),
                     FilledButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-                      child: const Text(S.delete),
+                      child: Text(S.delete),
                     ),
                   ],
                 ),

@@ -84,7 +84,7 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                 FilledButton.icon(
                   onPressed: _loading ? null : _createHousehold,
                   icon: const Icon(Icons.add_home_outlined),
-                  label: const Text(S.createHousehold),
+                  label: Text(S.createHousehold),
                   style: FilledButton.styleFrom(
                       backgroundColor: AppColors.amber,
                       foregroundColor: Colors.white,
@@ -94,7 +94,7 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                 OutlinedButton.icon(
                   onPressed: () => setState(() => _showJoinField = true),
                   icon: const Icon(Icons.group_add_outlined),
-                  label: const Text(S.joinWithCode),
+                  label: Text(S.joinWithCode),
                   style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.amberDark,
                       side: const BorderSide(color: AppColors.amber),
@@ -124,8 +124,8 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                       ? const SizedBox(
                           height: 20, width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text(S.joinBtn,
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                      : Text(S.joinBtn,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ],
             ],
@@ -172,11 +172,11 @@ class _InviteCodeCard extends StatelessWidget {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: code));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text(S.codeCopied)),
+                SnackBar(content: Text(S.codeCopied)),
               );
             },
             icon: const Icon(Icons.copy, size: 16),
-            label: const Text(S.copyCode),
+            label: Text(S.copyCode),
           ),
           const Gap(4),
           Text(S.allSet, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),

@@ -51,17 +51,17 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.editHouseholdName),
+        title: Text(S.editHouseholdName),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: S.householdNameHint),
+          decoration: InputDecoration(hintText: S.householdNameHint),
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(S.cancel),
+            child: Text(S.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -73,7 +73,7 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                   .updateHouseholdName(householdId, newName);
               ref.invalidate(currentHouseholdProvider);
             },
-            child: const Text(S.save),
+            child: Text(S.save),
           ),
         ],
       ),
@@ -88,7 +88,7 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
 
     return householdAsync.when(
       loading: () => const LoadingOverlay(),
-      error: (_, _) => const Center(child: Text(S.somethingWrong)),
+      error: (_, _) => Center(child: Text(S.somethingWrong)),
       data: (household) {
         if (household == null) return const SizedBox.shrink();
         return ListView(
@@ -169,9 +169,9 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                               final messenger = ScaffoldMessenger.of(context);
                               await Clipboard.setData(
                                   ClipboardData(text: household.inviteCode));
-                              messenger.showSnackBar(const SnackBar(
+                              messenger.showSnackBar(SnackBar(
                                 content: Text(S.codeCopied),
-                                duration: Duration(seconds: 2),
+                                duration: const Duration(seconds: 2),
                                 behavior: SnackBarBehavior.floating,
                                 backgroundColor: AppColors.black,
                               ));
@@ -248,17 +248,17 @@ class _MemberTile extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.removeMemberTitle),
+        title: Text(S.removeMemberTitle),
         content: Text(S.removeMemberContent(profile.displayName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(S.cancel),
+            child: Text(S.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(S.removeMember),
+            child: Text(S.removeMember),
           ),
         ],
       ),
@@ -379,7 +379,7 @@ class _InviteBanner extends StatelessWidget {
           FilledButton.icon(
             onPressed: () => Share.share(S.shareInviteText(inviteCode)),
             icon: const Icon(Icons.share_outlined, size: 18),
-            label: const Text(S.shareInviteBtn),
+            label: Text(S.shareInviteBtn),
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(46),
             ),

@@ -28,7 +28,7 @@ class ErrorDisplay extends StatelessWidget {
               FilledButton(
                 onPressed: onRetry,
                 style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
-                child: const Text(S.retry),
+                child: Text(S.retry),
               ),
             ],
           ],

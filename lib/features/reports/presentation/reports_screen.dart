@@ -85,7 +85,7 @@ class ReportsScreen extends ConsumerWidget {
                   margin: EdgeInsets.symmetric(horizontal: hPad(context)),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                      color: context.colors.surface, borderRadius: BorderRadius.circular(16)),
                   child: spendingAsync.when(
                     loading: () => const LoadingOverlay(),
                     error: (e, _) => ErrorDisplay(error: e),
@@ -104,7 +104,7 @@ class ReportsScreen extends ConsumerWidget {
                   margin: EdgeInsets.fromLTRB(hPad(context), 0, hPad(context), 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                      color: context.colors.surface, borderRadius: BorderRadius.circular(16)),
                   child: last6Async.when(
                     loading: () => const LoadingOverlay(),
                     error: (e, _) => ErrorDisplay(error: e),

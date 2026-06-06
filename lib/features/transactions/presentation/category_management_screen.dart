@@ -42,17 +42,17 @@ class _CategoryManagementScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text(S.deleteCategoryTitle),
+        title: Text(S.deleteCategoryTitle),
         content: Text(S.deleteCategoryContent(cat.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(S.cancel),
+            child: Text(S.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(S.delete),
+            child: Text(S.delete),
           ),
         ],
       ),
@@ -91,7 +91,7 @@ class _CategoryManagementScreenState
                   FilledButton.icon(
                     onPressed: _showCategoryForm,
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text(S.addCategory),
+                    label: Text(S.addCategory),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.black,
                       padding: const EdgeInsets.symmetric(
@@ -310,7 +310,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(S.categoryNameHint)),
+        SnackBar(content: Text(S.categoryNameHint)),
       );
       return;
     }
@@ -414,9 +414,9 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                     // Name field
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: S.categoryNameHint,
-                        prefixIcon: Icon(Icons.label_outline),
+                        prefixIcon: const Icon(Icons.label_outline),
                       ),
                       textCapitalization: TextCapitalization.sentences,
                     ),
@@ -504,7 +504,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                             labelStyle: AppTextStyles.bodyMedium
                                 .copyWith(fontWeight: FontWeight.w600),
                             unselectedLabelStyle: AppTextStyles.bodyMedium,
-                            tabs: const [
+                            tabs: [
                               Tab(text: S.categoryEmojiTab),
                               Tab(text: S.categoryIconTab),
                             ],

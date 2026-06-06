@@ -71,8 +71,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     FormBuilderTextField(
                       name: 'email',
-                      decoration: const InputDecoration(
-                          labelText: S.email, prefixIcon: Icon(Icons.email_outlined)),
+                      decoration: InputDecoration(
+                          labelText: S.email, prefixIcon: const Icon(Icons.email_outlined)),
                       keyboardType: TextInputType.emailAddress,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
@@ -110,8 +110,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ? const SizedBox(
                         height: 20, width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text(S.signIn,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    : Text(S.signIn,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ).animate().fadeIn(delay: 400.ms),
               const Gap(8),
               TextButton(

@@ -88,14 +88,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Future<void> _submit() async {
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(S.selectCategory)),
+        SnackBar(content: Text(S.selectCategory)),
       );
       return;
     }
     final amount = ThousandsSeparatorFormatter.parse(_amountController.text.trim());
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(S.invalidAmount)),
+        SnackBar(content: Text(S.invalidAmount)),
       );
       return;
     }
@@ -307,7 +307,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 ),
                               ),
                               CupertinoButton(
-                                child: const Text(S.done),
+                                child: Text(S.done),
                                 onPressed: () {
                                   setState(() => _date = temp);
                                   Navigator.pop(context);
@@ -342,7 +342,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     child: TextField(
                       controller: _notesController,
                       style: AppTextStyles.bodyMedium,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: S.notes,
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,

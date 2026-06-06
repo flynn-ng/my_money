@@ -16,6 +16,7 @@ import 'features/budget/presentation/set_budget_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/household/presentation/household_screen.dart' show HouseholdPage;
 import 'features/transactions/presentation/category_management_screen.dart';
+import 'features/profile/data/locale_provider.dart';
 import 'features/profile/data/theme_provider.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/reports/presentation/reports_screen.dart';
@@ -294,7 +295,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.black : AppColors.textSecondary;
+    final color = selected ? context.colors.textPrimary : AppColors.textSecondary;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -407,6 +408,7 @@ class MyMoneyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
     return MaterialApp.router(
       title: S.appName,
       debugShowCheckedModeBanner: false,
@@ -416,7 +418,7 @@ class MyMoneyApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('vi'), Locale('en')],
-      locale: const Locale('vi'),
+      locale: locale,
       theme: _buildTheme(dark: false),
       darkTheme: _buildTheme(dark: true),
       themeMode: themeMode,

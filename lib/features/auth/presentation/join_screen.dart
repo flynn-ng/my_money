@@ -79,7 +79,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                       setState(() { _status = _Status.joining; _error = null; });
                       _join();
                     },
-                    child: const Text(S.retry),
+                    child: Text(S.retry),
                   ),
                 ],
               ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
@@ -69,12 +68,12 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
                 controller: _tabController,
                 labelColor: context.colors.textPrimary,
                 unselectedLabelColor: context.colors.textSecondary,
-                indicatorColor: AppColors.black,
+                indicatorColor: context.colors.textPrimary,
                 indicatorWeight: 2,
                 labelStyle: AppTextStyles.bodyMedium
                     .copyWith(fontWeight: FontWeight.w600),
                 unselectedLabelStyle: AppTextStyles.bodyMedium,
-                tabs: const [
+                tabs: [
                   Tab(text: S.tabTransactions),
                   Tab(text: S.tabBudget),
                   Tab(text: S.tabSavings),

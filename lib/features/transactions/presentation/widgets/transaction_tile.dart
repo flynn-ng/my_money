@@ -31,17 +31,17 @@ class _TransactionTileState extends State<TransactionTile> {
     return showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text(S.deleteTransactionTitle),
-        content: const Text(S.deleteTransactionContent),
+        title: Text(S.deleteTransactionTitle),
+        content: Text(S.deleteTransactionContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(S.cancel),
+            child: Text(S.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(S.delete),
+            child: Text(S.delete),
           ),
         ],
       ),
@@ -58,10 +58,10 @@ class _TransactionTileState extends State<TransactionTile> {
         details.globalPosition.dy + 1,
       ),
       items: [
-        const PopupMenuItem(value: 'edit', child: Text(S.editTransaction)),
-        const PopupMenuItem(
+        PopupMenuItem(value: 'edit', child: Text(S.editTransaction)),
+        PopupMenuItem(
           value: 'delete',
-          child: Text(S.delete, style: TextStyle(color: AppColors.red)),
+          child: Text(S.delete, style: const TextStyle(color: AppColors.red)),
         ),
       ],
     );

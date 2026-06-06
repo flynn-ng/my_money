@@ -33,7 +33,7 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
     final amount = (values['amount'] as num?)?.toDouble() ?? 0;
     if (_isWithdrawal && amount > widget.goal.currentAmount) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(S.withdrawExceedsBalance), backgroundColor: AppColors.red),
+        SnackBar(content: Text(S.withdrawExceedsBalance), backgroundColor: AppColors.red),
       );
       return;
     }
@@ -107,9 +107,9 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
                 children: [
                   FormBuilderTextField(
                     name: 'amount',
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: S.contributeAmount,
-                      prefixIcon: Icon(Icons.payments_outlined),
+                      prefixIcon: const Icon(Icons.payments_outlined),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [ThousandsSeparatorFormatter()],
@@ -124,9 +124,9 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
                   const Gap(12),
                   FormBuilderTextField(
                     name: 'notes',
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: S.notes,
-                      prefixIcon: Icon(Icons.notes_outlined),
+                      prefixIcon: const Icon(Icons.notes_outlined),
                     ),
                   ),
                 ],

@@ -133,18 +133,18 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                 children: [
                   FormBuilderTextField(
                     name: 'name',
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: S.goalName,
-                      prefixIcon: Icon(Icons.flag_outlined),
+                      prefixIcon: const Icon(Icons.flag_outlined),
                     ),
                     validator: FormBuilderValidators.required(),
                   ),
                   const Gap(12),
                   FormBuilderTextField(
                     name: 'target',
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: S.targetAmount,
-                      prefixIcon: Icon(Icons.payments_outlined),
+                      prefixIcon: const Icon(Icons.payments_outlined),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [ThousandsSeparatorFormatter()],
@@ -178,7 +178,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                                 ),
                               ),
                               CupertinoButton(
-                                child: const Text(S.done),
+                                child: Text(S.done),
                                 onPressed: () {
                                   setState(() => _deadline = temp);
                                   Navigator.pop(context);
@@ -234,8 +234,8 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                   ? const SizedBox(
                       height: 20, width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text(S.save,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  : Text(S.save,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),
           ],
           ),

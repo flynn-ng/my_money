@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_theme.dart';
+import '../data/locale_provider.dart';
 import '../data/theme_provider.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -38,16 +39,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text(S.signOutConfirm),
+        title: Text(S.signOutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(S.cancel),
+            child: Text(S.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-            child: const Text(S.signOut),
+            child: Text(S.signOut),
           ),
         ],
       ),
@@ -117,14 +118,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               ),
               child: TabBar(
                 controller: _tabController,
-                labelColor: AppColors.black,
-                unselectedLabelColor: AppColors.textSecondary,
-                indicatorColor: AppColors.black,
+                labelColor: context.colors.textPrimary,
+                unselectedLabelColor: context.colors.textSecondary,
+                indicatorColor: context.colors.textPrimary,
                 indicatorWeight: 2,
                 labelStyle: AppTextStyles.bodyMedium
                     .copyWith(fontWeight: FontWeight.w600),
                 unselectedLabelStyle: AppTextStyles.bodyMedium,
-                tabs: const [
+                tabs: [
                   Tab(text: S.tabProfile),
                   Tab(text: S.tabSettings),
                 ],
@@ -159,7 +160,7 @@ class _ProfileTab extends StatelessWidget {
     return profileAsync.when(
       loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.black)),
-      error: (_, _) => const Center(child: Text(S.somethingWrong)),
+      error: (_, _) => Center(child: Text(S.somethingWrong)),
       data: (profile) {
         if (profile == null) return const SizedBox.shrink();
         return ListView(
@@ -186,9 +187,7 @@ class _SettingsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
-    final isDark = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system &&
-            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+    final locale = ref.watch(localeProvider);
 
     return ListView(
       padding: EdgeInsets.fromLTRB(hPad(context), 20, hPad(context), 32),
@@ -201,15 +200,40 @@ class _SettingsTab extends ConsumerWidget {
               value: '',
               onTap: () => context.push('/categories'),
             ),
-            const _Divider(),
-            _SwitchRow(
-              icon: Icons.dark_mode_outlined,
-              label: S.darkMode,
-              value: isDark,
-              onChanged: (v) => ref.read(themeModeProvider.notifier).set(
-                  v ? ThemeMode.dark : ThemeMode.light),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _Card(
+          children: [
+            _SegmentRow(
+              icon: Icons.brightness_6_outlined,
+              label: S.settingsAppearance,
+              segments: [
+                (ThemeMode.system, Icons.brightness_auto_outlined, S.themeSystem),
+                (ThemeMode.light, Icons.light_mode_outlined, S.themeLight),
+                (ThemeMode.dark, Icons.dark_mode_outlined, S.themeDark),
+              ],
+              selected: themeMode,
+              onChanged: (v) =>
+                  ref.read(themeModeProvider.notifier).set(v as ThemeMode),
             ),
             const _Divider(),
+            _SegmentRow(
+              icon: Icons.language_outlined,
+              label: S.settingsLanguage,
+              segments: [
+                (const Locale('vi'), null, S.languageVietnamese),
+                (const Locale('en'), null, S.languageEnglish),
+              ],
+              selected: locale,
+              onChanged: (v) =>
+                  ref.read(localeProvider.notifier).set(v as Locale),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _Card(
+          children: [
             _Row(
               icon: Icons.info_outline,
               label: S.settingsAbout,
@@ -227,7 +251,7 @@ class _SettingsTab extends ConsumerWidget {
         FilledButton.icon(
           onPressed: onSignOut,
           icon: const Icon(Icons.logout_rounded, size: 18),
-          label: const Text(S.signOut),
+          label: Text(S.signOut),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.red,
             foregroundColor: Colors.white,
@@ -285,12 +309,20 @@ class _Card extends StatelessWidget {
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+class _SegmentRow extends StatelessWidget {
   final IconData icon;
   final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  const _SwitchRow({required this.icon, required this.label, required this.value, required this.onChanged});
+  final List<(Object, IconData?, String)> segments;
+  final Object selected;
+  final ValueChanged<Object> onChanged;
+
+  const _SegmentRow({
+    required this.icon,
+    required this.label,
+    required this.segments,
+    required this.selected,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -300,11 +332,31 @@ class _SwitchRow extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: context.colors.textSecondary),
           const SizedBox(width: 12),
-          Expanded(child: Text(label, style: AppTextStyles.bodyMedium.copyWith(color: context.colors.textPrimary))),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: AppColors.black,
+          Expanded(
+            child: Text(label,
+                style: AppTextStyles.bodyMedium
+                    .copyWith(color: context.colors.textPrimary)),
+          ),
+          const SizedBox(width: 8),
+          SegmentedButton<Object>(
+            style: SegmentedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              textStyle: AppTextStyles.labelSmall,
+              selectedBackgroundColor: context.colors.textPrimary,
+              selectedForegroundColor: context.colors.background,
+              foregroundColor: context.colors.textSecondary,
+              side: BorderSide(color: context.colors.divider),
+            ),
+            segments: segments
+                .map((s) => ButtonSegment<Object>(
+                      value: s.$1,
+                      icon: s.$2 != null ? Icon(s.$2, size: 14) : null,
+                      label: Text(s.$3),
+                    ))
+                .toList(),
+            selected: {selected},
+            onSelectionChanged: (set) => onChanged(set.first),
+            showSelectedIcon: false,
           ),
         ],
       ),

@@ -8,6 +8,7 @@ import 'core/constants/supabase_constants.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('vi', null);
+  await initializeDateFormatting('en', null);
 
   await Supabase.initialize(
     url: supabaseUrl,
