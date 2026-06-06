@@ -139,24 +139,24 @@ class _AppShellState extends ConsumerState<_AppShell> {
       case 0:
         return FloatingActionButton(
           onPressed: () => AddTransactionScreen.show(context),
-          backgroundColor: AppColors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: context.colors.textPrimary,
+          foregroundColor: context.colors.background,
           elevation: 4,
           child: const Icon(Icons.add, size: 28),
         );
       case 1:
         return FloatingActionButton(
           onPressed: () => _showAddBudget(context),
-          backgroundColor: AppColors.amber,
-          foregroundColor: Colors.white,
+          backgroundColor: context.colors.textPrimary,
+          foregroundColor: context.colors.background,
           elevation: 4,
           child: const Icon(Icons.add, size: 28),
         );
       case 2:
         return FloatingActionButton(
           onPressed: () => AddGoalScreen.show(context),
-          backgroundColor: AppColors.amber,
-          foregroundColor: Colors.white,
+          backgroundColor: context.colors.textPrimary,
+          foregroundColor: context.colors.background,
           elevation: 4,
           child: const Icon(Icons.add, size: 28),
         );
