@@ -57,6 +57,7 @@ class SavingsBody extends ConsumerWidget {
             onDelete: () async {
               final confirm = await showDialog<bool>(
                 context: context,
+                useRootNavigator: false,
                 builder: (_) => AlertDialog(
                   title: Text(S.deleteGoalTitle),
                   content: Text(S.deleteGoalContent(goals[i].name)),

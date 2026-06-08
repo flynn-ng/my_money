@@ -65,6 +65,7 @@ class _HouseholdSwitcherSheetState
       List<HouseholdModel> all) async {
     final confirm = await showDialog<bool>(
       context: context,
+      useRootNavigator: false,
       builder: (_) => AlertDialog(
         title: Text(S.leaveHouseholdTitle),
         content: Text(S.leaveHouseholdContent(household.name)),

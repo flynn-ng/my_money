@@ -30,6 +30,7 @@ class _TransactionTileState extends State<TransactionTile> {
   Future<bool?> _showDeleteConfirm() {
     return showDialog<bool>(
       context: context,
+      useRootNavigator: false,
       builder: (_) => AlertDialog(
         title: Text(S.deleteTransactionTitle),
         content: Text(S.deleteTransactionContent),

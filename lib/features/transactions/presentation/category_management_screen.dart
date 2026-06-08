@@ -41,6 +41,7 @@ class _CategoryManagementScreenState
   Future<void> _confirmDelete(CategoryModel cat) async {
     final confirmed = await showDialog<bool>(
       context: context,
+      useRootNavigator: false,
       builder: (_) => AlertDialog(
         title: Text(S.deleteCategoryTitle),
         content: Text(S.deleteCategoryContent(cat.name)),

@@ -50,6 +50,7 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
     final controller = TextEditingController(text: currentName);
     await showDialog<void>(
       context: context,
+      useRootNavigator: false,
       builder: (ctx) => AlertDialog(
         title: Text(S.editHouseholdName),
         content: TextField(
@@ -247,6 +248,7 @@ class _MemberTile extends StatelessWidget {
   Future<void> _confirmRemove(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
+      useRootNavigator: false,
       builder: (ctx) => AlertDialog(
         title: Text(S.removeMemberTitle),
         content: Text(S.removeMemberContent(profile.displayName)),

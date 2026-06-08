@@ -40,6 +40,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   Future<void> _signOut() async {
     final confirm = await showDialog<bool>(
       context: context,
+      useRootNavigator: false,
       builder: (_) => AlertDialog(
         title: Text(S.signOutConfirm),
         actions: [
