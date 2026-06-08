@@ -27,13 +27,23 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authAsync = ref.watch(authStateProvider);
-  final profileAsync = ref.watch(currentProfileProvider);
+  // Bridge Riverpod auth/profile changes into a Listenable so the router can
+  // re-run its redirect WITHOUT being rebuilt. Recreating the GoRouter on every
+  // auth/profile emission swaps the RouterDelegate mid-transition and blanks the
+  // Navigator — most visibly on logout, where currentProfileProvider emits
+  // data → loading → null in quick succession (white screen).
+  final refresh = ValueNotifier<int>(0);
+  ref.listen(authStateProvider, (_, _) => refresh.value++);
+  ref.listen(currentProfileProvider, (_, _) => refresh.value++);
+  ref.onDispose(refresh.dispose);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
+    refreshListenable: refresh,
     redirect: (context, state) {
+      final authAsync = ref.read(authStateProvider);
+      final profileAsync = ref.read(currentProfileProvider);
       final isLoading = authAsync.isLoading ||
           (authAsync.value?.session != null && profileAsync.isLoading);
       if (isLoading) {
