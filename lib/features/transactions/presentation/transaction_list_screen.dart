@@ -204,6 +204,12 @@ class _TransactionList extends StatelessWidget {
                   transaction: tx,
                   onTap: () => AddTransactionScreen.show(context, transaction: tx),
                   onDelete: () async {
+                    // Invalidate immediately so the ListView (and the
+                    // dismissed Dismissible) is torn down on this frame.
+                    // Without this, anything that triggers a rebuild before
+                    // the network call completes causes a Flutter assertion:
+                    // "A dismissed Dismissible widget is still part of the tree."
+                    ref.invalidate(transactionsProvider);
                     await ref
                         .read(transactionRepositoryProvider)
                         .deleteTransaction(tx.id);
