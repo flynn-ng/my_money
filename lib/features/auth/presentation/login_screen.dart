@@ -98,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
-              ).animate().fadeIn(delay: 300.ms),
+              ),
               const Gap(20),
               FilledButton(
                 onPressed: _loading ? null : _submit,
