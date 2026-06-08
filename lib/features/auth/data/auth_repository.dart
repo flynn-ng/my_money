@@ -87,15 +87,12 @@ class AuthRepository {
   }
 
   Future<void> removeHouseholdMember(String memberId, String householdId) async {
-    await _client
-        .from(tableProfileHouseholdMemberships)
-        .delete()
-        .eq('profile_id', memberId)
-        .eq('household_id', householdId);
-    await _client
-        .from(tableProfiles)
-        .update({'household_id': null})
-        .eq('id', memberId);
+    // SECURITY DEFINER RPC — direct writes are blocked by RLS, which only lets
+    // a user modify their own profile/membership rows.
+    await _client.rpc('remove_household_member', params: {
+      'member_id': memberId,
+      'household_id': householdId,
+    });
   }
 
   Future<HouseholdModel> joinHousehold(String inviteCode, String userId) async {
