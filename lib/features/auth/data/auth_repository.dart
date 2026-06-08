@@ -86,7 +86,12 @@ class AuthRepository {
         .eq('id', householdId);
   }
 
-  Future<void> removeHouseholdMember(String memberId) async {
+  Future<void> removeHouseholdMember(String memberId, String householdId) async {
+    await _client
+        .from(tableProfileHouseholdMemberships)
+        .delete()
+        .eq('profile_id', memberId)
+        .eq('household_id', householdId);
     await _client
         .from(tableProfiles)
         .update({'household_id': null})

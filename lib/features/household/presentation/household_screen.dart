@@ -218,7 +218,7 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                                         await ref
                                             .read(authRepositoryProvider)
                                             .removeHouseholdMember(
-                                                members[i].id);
+                                                members[i].id, household.id);
                                         ref.invalidate(householdMembersProvider);
                                       },
                               ),
