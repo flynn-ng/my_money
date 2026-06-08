@@ -27,8 +27,8 @@ class TransactionListBody extends ConsumerWidget {
             const SizedBox.shrink(),
         Expanded(
           child: txAsync.when(
-            loading: () => const Center(
-                child: CircularProgressIndicator(color: AppColors.amber)),
+            loading: () => Center(
+                child: CircularProgressIndicator(color: context.colors.textPrimary)),
             error: (e, _) => ErrorDisplay(
                 error: e, onRetry: () => ref.invalidate(transactionsProvider)),
             data: (transactions) {
@@ -126,7 +126,7 @@ class _Stat extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(width: 1, height: 28, color: AppColors.divider);
+      Container(width: 1, height: 28, color: context.colors.divider);
 }
 
 class _EmptyView extends StatelessWidget {
@@ -152,7 +152,7 @@ class _EmptyView extends StatelessWidget {
             onPressed: () => AddTransactionScreen.show(context),
             icon: const Icon(Icons.add),
             label: Text(S.addTransaction),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.textPrimary),
           ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
         ],
       ),

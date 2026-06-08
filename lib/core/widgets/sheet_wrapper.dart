@@ -1,5 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/app_theme.dart';
+
+/// Unified header for modal bottom sheets: title on the left, an optional
+/// [trailing] widget, and a close button on the right. Keeps the add/edit
+/// sheets (transaction / budget / goal) visually consistent.
+class SheetHeader extends StatelessWidget {
+  final String title;
+  final Widget? trailing;
+  const SheetHeader({super.key, required this.title, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 2, 8, 2),
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: context.tsTitleMedium)),
+          if (trailing != null) ...[trailing!, const SizedBox(width: 4)],
+          IconButton(
+            icon: const Icon(Icons.close),
+            color: context.colors.textSecondary,
+            onPressed: () => context.pop(),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Consistent wrapper for all modal bottom sheet content.
 /// Provides cream background, rounded top corners, and a drag handle pill.

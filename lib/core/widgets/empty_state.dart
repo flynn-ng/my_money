@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_text_styles.dart';
+import '../constants/app_theme.dart';
 
 class EmptyState extends StatelessWidget {
   final String emoji;
@@ -26,10 +25,10 @@ class EmptyState extends StatelessWidget {
           children: [
             Text(emoji, style: const TextStyle(fontSize: 56)),
             const SizedBox(height: 16),
-            Text(title, style: AppTextStyles.titleMedium, textAlign: TextAlign.center),
+            Text(title, style: context.tsTitleMedium, textAlign: TextAlign.center),
             const SizedBox(height: 6),
             Text(subtitle,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                style: context.tsBodyMedium,
                 textAlign: TextAlign.center),
             if (action != null) ...[const SizedBox(height: 20), action!],
           ],

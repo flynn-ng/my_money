@@ -164,44 +164,33 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       },
       child: Column(
         children: [
-          // Top bar
-          Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 16, 0),
+          // Unified header — title left, type toggle + close right
+          SheetHeader(
+            title: _isEditing ? S.editTransaction : S.addTransaction,
+            trailing: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: context.colors.background,
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    color: context.colors.textSecondary,
-                    onPressed: () => context.pop(),
+                  _Pill(
+                    label: S.expense,
+                    selected: _type == TransactionType.expense,
+                    color: AppColors.red,
+                    onTap: () => _switchType(TransactionType.expense),
                   ),
-                  const Spacer(),
-                  // Type toggle — minimal pills
-                  Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: context.colors.background,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        _Pill(
-                          label: S.expense,
-                          selected: _type == TransactionType.expense,
-                          color: AppColors.red,
-                          onTap: () => _switchType(TransactionType.expense),
-                        ),
-                        _Pill(
-                          label: S.income,
-                          selected: _type == TransactionType.income,
-                          color: AppColors.green,
-                          onTap: () => _switchType(TransactionType.income),
-                        ),
-                      ],
-                    ),
+                  _Pill(
+                    label: S.income,
+                    selected: _type == TransactionType.income,
+                    color: AppColors.green,
+                    onTap: () => _switchType(TransactionType.income),
                   ),
                 ],
               ),
-            ).animate().fadeIn(duration: 200.ms),
+            ),
+          ).animate().fadeIn(duration: 200.ms),
 
             const SizedBox(height: 24),
 
@@ -212,7 +201,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 children: [
                   Text(S.amount,
                       style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textSecondary)),
+                          color: context.colors.textSecondary)),
                   const SizedBox(height: 8),
                   IntrinsicWidth(
                     child: TextField(
@@ -236,7 +225,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         hintStyle: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary.withValues(alpha: 0.3),
+                          color: context.colors.textSecondary.withValues(alpha: 0.3),
                           letterSpacing: -1,
                         ),
                         suffixText: '₫',
@@ -255,21 +244,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       Icon(Icons.chevron_left,
                           size: 14,
                           color: _type == TransactionType.income
-                              ? AppColors.textSecondary.withValues(alpha: 0.4)
+                              ? context.colors.textSecondary.withValues(alpha: 0.4)
                               : Colors.transparent),
                       const SizedBox(width: 4),
                       Text(
                         _type == TransactionType.expense ? S.income : S.expense,
                         style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.textSecondary.withValues(alpha: 0.4),
+                          color: context.colors.textSecondary.withValues(alpha: 0.4),
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(Icons.chevron_right,
                           size: 14,
                           color: _type == TransactionType.expense
-                              ? AppColors.textSecondary.withValues(alpha: 0.4)
+                              ? context.colors.textSecondary.withValues(alpha: 0.4)
                               : Colors.transparent),
                     ],
                   ),
@@ -278,7 +267,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ).animate().fadeIn(delay: 60.ms).slideY(begin: -0.1),
 
             const SizedBox(height: 12),
-            Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
 
             // Category + date row
             Padding(
@@ -327,8 +316,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 14, color: AppColors.textSecondary),
+                          Icon(Icons.calendar_today_outlined,
+                              size: 14, color: context.colors.textSecondary),
                           const SizedBox(width: 5),
                           Text(_date.shortDate,
                               style: AppTextStyles.labelSmall),
@@ -357,15 +346,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ),
             ).animate().fadeIn(delay: 100.ms),
 
-            Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
             const SizedBox(height: 12),
 
             // Categories
             Expanded(
               child: categoriesAsync.when(
-                loading: () => const Center(
+                loading: () => Center(
                     child: CircularProgressIndicator(
-                        color: AppColors.amber, strokeWidth: 2)),
+                        color: context.colors.textPrimary, strokeWidth: 2)),
                 error: (e, st) => Center(child: Text(friendlyError(e))),
                 data: (cats) {
                   if (_isEditing && !_categoriesInitialized) {
@@ -401,7 +390,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           decoration: BoxDecoration(
                             color: selected
                                 ? cat.colorValue.withValues(alpha: 0.15)
-                                : AppColors.cream,
+                                : context.colors.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: selected ? cat.colorValue : Colors.transparent,
@@ -422,7 +411,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                       : FontWeight.w500,
                                   color: selected
                                       ? cat.colorValue
-                                      : AppColors.textSecondary,
+                                      : context.colors.textSecondary,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
@@ -497,7 +486,7 @@ class _Pill extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : AppColors.textSecondary,
+            color: selected ? Colors.white : context.colors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),

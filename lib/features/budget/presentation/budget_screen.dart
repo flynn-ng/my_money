@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_display.dart';
 import '../../../core/widgets/loading_overlay.dart';
-import '../../../core/widgets/sheet_wrapper.dart';
 import '../data/budget_repository.dart';
 import 'set_budget_screen.dart';
 import 'widgets/budget_progress_card.dart';
@@ -31,7 +30,7 @@ class BudgetBody extends ConsumerWidget {
               onPressed: () => _showSetBudget(context),
               icon: const Icon(Icons.add),
               label: Text(S.setBudgetTitle),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+              style: FilledButton.styleFrom(backgroundColor: context.colors.textPrimary),
             ),
           );
         }
@@ -40,24 +39,10 @@ class BudgetBody extends ConsumerWidget {
           itemCount: budgets.length,
           itemBuilder: (context, i) => BudgetProgressCard(
             budget: budgets[i],
-            onEdit: () => _showSetBudget(context, existing: budgets[i]),
+            onEdit: () => SetBudgetScreen.show(context, existing: budgets[i]),
           ),
         );
       },
-    );
-  }
-
-  void _showSetBudget(BuildContext context, {dynamic existing}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.72,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, _) => SheetWrapper(child: SetBudgetScreen(existing: existing)),
-      ),
     );
   }
 }

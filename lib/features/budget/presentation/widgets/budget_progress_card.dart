@@ -51,7 +51,7 @@ class BudgetProgressCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(budget.categoryName ?? '',
-                      style: AppTextStyles.bodyLarge),
+                      style: context.tsBodyLarge),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -59,7 +59,7 @@ class BudgetProgressCard extends StatelessWidget {
                     Text(budget.spent.asCurrency,
                         style: AppTextStyles.titleMedium.copyWith(color: color)),
                     Text('${S.budgetOf} ${budget.amount.asCurrency}',
-                        style: AppTextStyles.bodyMedium),
+                        style: context.tsBodyMedium),
                   ],
                 ),
               ],
@@ -79,7 +79,7 @@ class BudgetProgressCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('${(progress * 100).toStringAsFixed(0)}${S.budgetPercentUsed}',
-                    style: AppTextStyles.labelSmall),
+                    style: context.tsLabelSmall),
                 Text(
                   budget.remaining >= 0
                       ? '${budget.remaining.asCurrency} ${S.budgetLeft}'

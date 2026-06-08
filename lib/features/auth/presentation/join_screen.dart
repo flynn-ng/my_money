@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
 import '../data/auth_repository.dart';
@@ -55,7 +55,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -64,14 +64,17 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (_status == _Status.joining) ...[
-                  const CircularProgressIndicator(color: AppColors.black),
+                  CircularProgressIndicator(color: context.colors.textPrimary),
                   const SizedBox(height: 20),
-                  Text(S.joiningHousehold, style: AppTextStyles.titleMedium),
+                  Text(S.joiningHousehold,
+                      style: AppTextStyles.titleMedium
+                          .copyWith(color: context.colors.textPrimary)),
                 ] else ...[
                   const Text('😕', style: TextStyle(fontSize: 48)),
                   const SizedBox(height: 16),
                   Text(_error ?? S.somethingWrong,
-                      style: AppTextStyles.bodyMedium,
+                      style: AppTextStyles.bodyMedium
+                          .copyWith(color: context.colors.textSecondary),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 24),
                   FilledButton(

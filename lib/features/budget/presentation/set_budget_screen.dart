@@ -10,6 +10,7 @@ import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/thousands_formatter.dart';
+import '../../../core/widgets/sheet_wrapper.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../transactions/data/category_model.dart';
 import '../../transactions/data/transaction_repository.dart';
@@ -19,6 +20,20 @@ import '../data/budget_repository.dart';
 class SetBudgetScreen extends ConsumerStatefulWidget {
   final BudgetModel? existing;
   const SetBudgetScreen({super.key, this.existing});
+
+  static Future<void> show(BuildContext context, {BudgetModel? existing}) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.78,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, _) => SheetWrapper(child: SetBudgetScreen(existing: existing)),
+      ),
+    );
+  }
 
   @override
   ConsumerState<SetBudgetScreen> createState() => _SetBudgetScreenState();
@@ -65,22 +80,19 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      appBar: AppBar(
-        backgroundColor: context.colors.background,
-        elevation: 0,
-        title: Text(S.setBudgetTitle, style: AppTextStyles.titleMedium),
-        leading: CloseButton(color: AppColors.textPrimary),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SheetHeader(title: S.setBudgetTitle),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
             if (widget.existing == null)
               categoriesAsync.when(
-                loading: () => const CircularProgressIndicator(color: AppColors.amber),
+                loading: () => CircularProgressIndicator(color: context.colors.textPrimary),
                 error: (e, _) => Text(friendlyError(e)),
                 data: (cats) {
                   final expenseCats = cats.where((c) => c.type != 'income').toList();
@@ -97,10 +109,10 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? cat.colorValue.withValues(alpha: 0.18)
-                                : Colors.white,
+                                : context.colors.surface,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: isSelected ? cat.colorValue : AppColors.divider,
+                              color: isSelected ? cat.colorValue : context.colors.divider,
                               width: isSelected ? 1.5 : 1,
                             ),
                           ),
@@ -154,19 +166,22 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
             FilledButton(
               onPressed: _loading ? null : _submit,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.amber,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.colors.textPrimary,
+                  foregroundColor: context.colors.background,
                   padding: const EdgeInsets.symmetric(vertical: 14)),
               child: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20, width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: context.colors.background))
                   : Text(S.save,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

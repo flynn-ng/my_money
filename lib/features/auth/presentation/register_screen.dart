@@ -51,16 +51,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
           backgroundColor: context.colors.background,
           elevation: 0,
-          leading: BackButton(color: AppColors.textPrimary)),
+          leading: BackButton(color: context.colors.textPrimary)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(S.createAccount, style: AppTextStyles.displayLarge),
+              Text(S.createAccount,
+                  style: AppTextStyles.displayLarge
+                      .copyWith(color: context.colors.textPrimary)),
               const Gap(4),
-              Text(S.tagline, style: AppTextStyles.bodyMedium),
+              Text(S.tagline,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: context.colors.textSecondary)),
               const Gap(28),
               FormBuilder(
                 key: _formKey,
@@ -110,13 +114,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               FilledButton(
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.amber,
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.colors.textPrimary,
+                    foregroundColor: context.colors.background,
                     padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: _loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20, width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: context.colors.background))
                     : Text(S.createAccount,
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ),
@@ -124,7 +129,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextButton(
                 onPressed: () => context.pop(),
                 child: Text(S.haveAccount,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.amberDark)),
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: context.colors.textPrimary)),
               ),
             ],
           ),

@@ -99,10 +99,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: AppColors.surface,
+                                color: context.colors.surface,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: AppColors.divider, width: 1.5),
+                                    color: context.colors.divider, width: 1.5),
                               ),
                               alignment: Alignment.center,
                               child: Text(profile.avatarEmoji,
@@ -115,13 +115,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                 width: 20,
                                 height: 20,
                                 decoration: BoxDecoration(
-                                  color: AppColors.black,
+                                  color: context.colors.textPrimary,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                      color: AppColors.surface, width: 1.5),
+                                      color: context.colors.surface, width: 1.5),
                                 ),
-                                child: const Icon(Icons.edit,
-                                    size: 11, color: Colors.white),
+                                child: Icon(Icons.edit,
+                                    size: 11, color: context.colors.background),
                               ),
                             ),
                           ],
@@ -133,11 +133,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(profile.displayName,
-                                style: AppTextStyles.titleMedium),
+                                style: AppTextStyles.titleMedium
+                                    .copyWith(color: context.colors.textPrimary)),
                             const SizedBox(height: 2),
                             Text(email,
                                 style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary)),
+                                    color: context.colors.textSecondary)),
                           ],
                         ),
                       ),
@@ -148,8 +149,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             ),
             // ── Tab bar ────────────────────────────────────────────
             Container(
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.divider)),
+              decoration: BoxDecoration(
+                border: Border(
+                    bottom: BorderSide(color: context.colors.divider)),
               ),
               child: TabBar(
                 controller: _tabController,
@@ -193,8 +195,8 @@ class _ProfileTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return profileAsync.when(
-      loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.black)),
+      loading: () => Center(
+          child: CircularProgressIndicator(color: context.colors.textPrimary)),
       error: (_, _) => Center(child: Text(S.somethingWrong)),
       data: (profile) {
         if (profile == null) return const SizedBox.shrink();
@@ -324,12 +326,14 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: context.colors.textSecondary),
         const SizedBox(width: 8),
-        Text('$label: ', style: AppTextStyles.bodyMedium),
+        Text('$label: ',
+            style: AppTextStyles.bodyMedium
+                .copyWith(color: context.colors.textPrimary)),
         Text(value,
             style: AppTextStyles.bodyMedium
-                .copyWith(color: AppColors.textSecondary)),
+                .copyWith(color: context.colors.textSecondary)),
       ],
     );
   }
@@ -432,23 +436,27 @@ class _Row extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: AppColors.textSecondary),
+            Icon(icon, size: 18, color: context.colors.textSecondary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: AppTextStyles.bodyMedium),
+                  Text(label,
+                      style: AppTextStyles.bodyMedium
+                          .copyWith(color: context.colors.textPrimary)),
                   if (value.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(value, style: AppTextStyles.bodyLarge),
+                    Text(value,
+                        style: AppTextStyles.bodyLarge
+                            .copyWith(color: context.colors.textPrimary)),
                   ],
                 ],
               ),
             ),
             if (onTap != null)
-              const Icon(Icons.chevron_right,
-                  size: 18, color: AppColors.textSecondary),
+              Icon(Icons.chevron_right,
+                  size: 18, color: context.colors.textSecondary),
           ],
         ),
       ),

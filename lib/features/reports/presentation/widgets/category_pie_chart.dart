@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_theme.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/extensions/currency_ext.dart';
 import '../../../reports/data/reports_repository.dart';
@@ -22,7 +22,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
     if (widget.data.isEmpty) {
       return Center(
         child: Text(S.noSpendingData,
-            style: const TextStyle(color: AppColors.textSecondary)),
+            style: TextStyle(color: context.colors.textSecondary)),
       );
     }
 
@@ -68,7 +68,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
           const SizedBox(height: 8),
           Text(
             '${widget.data[_touchedIndex].categoryIcon} ${widget.data[_touchedIndex].categoryName}: ${widget.data[_touchedIndex].amount.asCurrency}',
-            style: AppTextStyles.bodyLarge,
+            style: context.tsBodyLarge,
           ),
         ],
         const SizedBox(height: 16),
@@ -88,7 +88,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                         BoxDecoration(color: color, shape: BoxShape.circle)),
                 const SizedBox(width: 4),
                 Text('${d.categoryIcon} ${d.categoryName}',
-                    style: AppTextStyles.labelSmall),
+                    style: context.tsLabelSmall),
               ],
             );
           }).toList(),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
-import '../constants/app_text_styles.dart';
+import '../constants/app_theme.dart';
 import '../l10n/app_strings.dart';
 import '../utils/error_handler.dart';
 
@@ -20,14 +20,14 @@ class ErrorDisplay extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.red),
             const SizedBox(height: 12),
-            Text(S.somethingWrong, style: AppTextStyles.titleMedium),
+            Text(S.somethingWrong, style: context.tsTitleMedium),
             const SizedBox(height: 4),
-            Text(friendlyError(error), style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
+            Text(friendlyError(error), style: context.tsBodyMedium, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: onRetry,
-                style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+                style: FilledButton.styleFrom(backgroundColor: context.colors.textPrimary),
                 child: Text(S.retry),
               ),
             ],

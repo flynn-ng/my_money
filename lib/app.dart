@@ -6,7 +6,6 @@ import 'core/constants/app_colors.dart';
 import 'core/constants/app_text_styles.dart';
 import 'core/constants/app_theme.dart';
 import 'core/l10n/app_strings.dart';
-import 'core/widgets/sheet_wrapper.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/presentation/household_link_screen.dart';
 import 'features/auth/presentation/join_screen.dart';
@@ -156,7 +155,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
         );
       case 1:
         return FloatingActionButton(
-          onPressed: () => _showAddBudget(context),
+          onPressed: () => SetBudgetScreen.show(context),
           backgroundColor: context.colors.textPrimary,
           foregroundColor: context.colors.background,
           elevation: 4,
@@ -229,20 +228,6 @@ class _AppShellState extends ConsumerState<_AppShell> {
     );
   }
 
-  void _showAddBudget(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.72,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, _) => const SheetWrapper(child: SetBudgetScreen()),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
@@ -305,7 +290,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? context.colors.textPrimary : AppColors.textSecondary;
+    final color = selected ? context.colors.textPrimary : context.colors.textSecondary;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,

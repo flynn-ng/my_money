@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_display.dart';
@@ -32,7 +33,7 @@ class SavingsBody extends ConsumerWidget {
               onPressed: () => AddGoalScreen.show(context),
               icon: const Icon(Icons.add),
               label: Text(S.addGoal),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+              style: FilledButton.styleFrom(backgroundColor: context.colors.textPrimary),
             ),
           );
         }

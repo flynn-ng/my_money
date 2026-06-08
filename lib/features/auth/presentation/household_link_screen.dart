@@ -74,9 +74,15 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
               const Gap(40),
               const Text('🏠', style: TextStyle(fontSize: 56), textAlign: TextAlign.center),
               const Gap(16),
-              Text(S.householdSetup, style: AppTextStyles.displayLarge, textAlign: TextAlign.center),
+              Text(S.householdSetup,
+                  style: AppTextStyles.displayLarge
+                      .copyWith(color: context.colors.textPrimary),
+                  textAlign: TextAlign.center),
               const Gap(6),
-              Text(S.householdSubtitle, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
+              Text(S.householdSubtitle,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: context.colors.textSecondary),
+                  textAlign: TextAlign.center),
               const Gap(40),
               if (_createdCode != null)
                 _InviteCodeCard(code: _createdCode!)
@@ -86,8 +92,8 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                   icon: const Icon(Icons.add_home_outlined),
                   label: Text(S.createHousehold),
                   style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.amber,
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.textPrimary,
+                      foregroundColor: context.colors.background,
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                 ),
                 const Gap(12),
@@ -96,8 +102,8 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                   icon: const Icon(Icons.group_add_outlined),
                   label: Text(S.joinWithCode),
                   style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.amberDark,
-                      side: const BorderSide(color: AppColors.amber),
+                      foregroundColor: context.colors.textPrimary,
+                      side: BorderSide(color: context.colors.divider),
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                 ),
               ] else ...[
@@ -117,13 +123,15 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                 FilledButton(
                   onPressed: _loading ? null : _joinHousehold,
                   style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.amber,
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.textPrimary,
+                      foregroundColor: context.colors.background,
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20, width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: context.colors.background))
                       : Text(S.joinBtn,
                           style: const TextStyle(fontWeight: FontWeight.w700)),
                 ),
@@ -153,19 +161,23 @@ class _InviteCodeCard extends StatelessWidget {
         children: [
           const Icon(Icons.check_circle_outline, color: AppColors.green, size: 48),
           const Gap(12),
-          Text(S.householdCreated, style: AppTextStyles.titleLarge),
+          Text(S.householdCreated,
+              style: AppTextStyles.titleLarge
+                  .copyWith(color: context.colors.textPrimary)),
           const Gap(6),
-          Text(S.shareCodeHint, style: AppTextStyles.bodyMedium),
+          Text(S.shareCodeHint,
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: context.colors.textSecondary)),
           const Gap(16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.amberLight,
+              color: context.colors.textPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(code,
                 style: AppTextStyles.titleLarge.copyWith(
-                    letterSpacing: 4, color: AppColors.amberDark)),
+                    letterSpacing: 4, color: context.colors.textPrimary)),
           ),
           const Gap(12),
           TextButton.icon(
@@ -179,7 +191,10 @@ class _InviteCodeCard extends StatelessWidget {
             label: Text(S.copyCode),
           ),
           const Gap(4),
-          Text(S.allSet, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
+          Text(S.allSet,
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: context.colors.textSecondary),
+              textAlign: TextAlign.center),
         ],
       ),
     );

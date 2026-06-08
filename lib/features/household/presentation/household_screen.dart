@@ -25,7 +25,9 @@ class HouseholdPage extends StatelessWidget {
           children: [
             Padding(
               padding: EdgeInsets.fromLTRB(hPad(context), 20, hPad(context), 8),
-              child: Text(S.tabHousehold, style: AppTextStyles.titleLarge),
+              child: Text(S.tabHousehold,
+                  style: AppTextStyles.titleLarge
+                      .copyWith(color: context.colors.textPrimary)),
             ),
             const Expanded(child: HouseholdScreen()),
           ],
@@ -105,18 +107,20 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                           horizontal: 16, vertical: 14),
                       child: Row(
                         children: [
-                          const Icon(Icons.home_outlined,
-                              size: 18, color: AppColors.textSecondary),
+                          Icon(Icons.home_outlined,
+                              size: 18, color: context.colors.textSecondary),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(S.householdLabel,
-                                    style: AppTextStyles.bodyMedium),
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                        color: context.colors.textPrimary)),
                                 const SizedBox(height: 2),
                                 Text(household.name,
-                                    style: AppTextStyles.bodyLarge),
+                                    style: AppTextStyles.bodyLarge.copyWith(
+                                        color: context.colors.textPrimary)),
                               ],
                             ),
                           ),
@@ -135,15 +139,16 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                           horizontal: 16, vertical: 14),
                       child: Row(
                         children: [
-                          const Icon(Icons.vpn_key_outlined,
-                              size: 18, color: AppColors.textSecondary),
+                          Icon(Icons.vpn_key_outlined,
+                              size: 18, color: context.colors.textSecondary),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(S.inviteCodeLabel,
-                                    style: AppTextStyles.bodyMedium),
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                        color: context.colors.textPrimary)),
                                 const SizedBox(height: 2),
                                 Text(
                                   _codeVisible
@@ -151,6 +156,7 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                                       : '••••••',
                                   style: AppTextStyles.titleMedium.copyWith(
                                     letterSpacing: _codeVisible ? 2.0 : 4.0,
+                                    color: context.colors.textPrimary,
                                   ),
                                 ),
                               ],
@@ -174,7 +180,7 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                                 content: Text(S.codeCopied),
                                 duration: const Duration(seconds: 2),
                                 behavior: SnackBarBehavior.floating,
-                                backgroundColor: AppColors.black,
+                                backgroundColor: context.colors.textPrimary,
                               ));
                             },
                           ),
@@ -203,7 +209,8 @@ class _HouseholdScreenState extends ConsumerState<HouseholdScreen> {
                       children: [
                         Text(
                           '${S.householdMembers} (${members.length})',
-                          style: AppTextStyles.titleMedium,
+                          style: AppTextStyles.titleMedium
+                              .copyWith(color: context.colors.textPrimary),
                         ),
                         const SizedBox(height: 8),
                         _Card(
@@ -288,7 +295,9 @@ class _MemberTile extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(profile.displayName, style: AppTextStyles.bodyLarge),
+            child: Text(profile.displayName,
+                style: AppTextStyles.bodyLarge
+                    .copyWith(color: context.colors.textPrimary)),
           ),
           if (isMe)
             Container(
@@ -296,11 +305,11 @@ class _MemberTile extends StatelessWidget {
               decoration: BoxDecoration(
                 color: context.colors.surface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.divider),
+                border: Border.all(color: context.colors.divider),
               ),
               child: Text(S.youSuffix,
                   style: AppTextStyles.labelSmall
-                      .copyWith(color: AppColors.textSecondary)),
+                      .copyWith(color: context.colors.textSecondary)),
             )
           else if (onRemove != null)
             _TinyButton(
@@ -325,11 +334,11 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-              color: AppColors.cardShadow,
+              color: context.colors.cardShadow,
               blurRadius: 6,
-              offset: Offset(0, 2)),
+              offset: const Offset(0, 2)),
         ],
       ),
       child: Column(children: children),
@@ -362,20 +371,22 @@ class _InviteBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.colors.divider),
         boxShadow: [
-          BoxShadow(color: context.colors.cardShadow, blurRadius: 6, offset: Offset(0, 2)),
+          BoxShadow(color: context.colors.cardShadow, blurRadius: 6, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
         children: [
           const Text('👋', style: TextStyle(fontSize: 36)),
           const SizedBox(height: 10),
-          Text(S.inviteBannerTitle, style: AppTextStyles.titleMedium),
+          Text(S.inviteBannerTitle,
+              style: AppTextStyles.titleMedium
+                  .copyWith(color: context.colors.textPrimary)),
           const SizedBox(height: 4),
           Text(S.inviteBannerSubtitle,
               style: AppTextStyles.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
+                  .copyWith(color: context.colors.textSecondary),
               textAlign: TextAlign.center),
           const SizedBox(height: 16),
           FilledButton.icon(
@@ -408,7 +419,7 @@ class _TinyButton extends StatelessWidget {
           color: context.colors.background,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, size: 16, color: AppColors.textSecondary),
+        child: Icon(icon, size: 16, color: context.colors.textSecondary),
       ),
     );
   }

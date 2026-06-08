@@ -59,10 +59,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   .animate()
                   .scale(duration: 400.ms, curve: Curves.elasticOut),
               const Gap(12),
-              Text(S.appName, style: AppTextStyles.displayLarge, textAlign: TextAlign.center)
+              Text(S.appName,
+                      style: AppTextStyles.displayLarge
+                          .copyWith(color: context.colors.textPrimary),
+                      textAlign: TextAlign.center)
                   .animate().fadeIn(delay: 150.ms),
               const Gap(4),
-              Text(S.tagline, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center)
+              Text(S.tagline,
+                      style: AppTextStyles.bodyMedium
+                          .copyWith(color: context.colors.textSecondary),
+                      textAlign: TextAlign.center)
                   .animate().fadeIn(delay: 250.ms),
               const Gap(40),
               FormBuilder(
@@ -103,13 +109,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               FilledButton(
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.amber,
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.colors.textPrimary,
+                    foregroundColor: context.colors.background,
                     padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: _loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20, width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: context.colors.background))
                     : Text(S.signIn,
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ).animate().fadeIn(delay: 400.ms),
@@ -117,7 +124,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               TextButton(
                 onPressed: () => context.push('/register'),
                 child: Text(S.noAccount,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.amberDark)),
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: context.colors.textPrimary)),
               ).animate().fadeIn(delay: 500.ms),
             ],
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -28,7 +27,7 @@ class ReportsScreen extends ConsumerWidget {
       backgroundColor: context.colors.background,
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.amber,
+          color: context.colors.textPrimary,
           onRefresh: () async {
             ref.invalidate(transactionsProvider);
             ref.invalidate(categorySpendingProvider);
@@ -46,8 +45,8 @@ class ReportsScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(S.tabReports, style: AppTextStyles.titleLarge),
-                            Text(month.monthYear, style: AppTextStyles.bodyMedium),
+                            Text(S.tabReports, style: context.tsTitleLarge),
+                            Text(month.monthYear, style: context.tsBodyMedium),
                           ],
                         ),
                       ),
@@ -77,7 +76,7 @@ class ReportsScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(hPad(context), 16, hPad(context), 8),
-                  child: Text(S.spendingByCategory, style: AppTextStyles.titleMedium),
+                  child: Text(S.spendingByCategory, style: context.tsTitleMedium),
                 ),
               ),
               SliverToBoxAdapter(
@@ -96,7 +95,7 @@ class ReportsScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(hPad(context), 16, hPad(context), 8),
-                  child: Text(S.last6Months, style: AppTextStyles.titleMedium),
+                  child: Text(S.last6Months, style: context.tsTitleMedium),
                 ),
               ),
               SliverToBoxAdapter(
@@ -149,7 +148,7 @@ class _Legend extends StatelessWidget {
             decoration:
                 BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
         const SizedBox(width: 4),
-        Text(label, style: AppTextStyles.labelSmall),
+        Text(label, style: context.tsLabelSmall),
       ],
     );
   }

@@ -67,8 +67,8 @@ class GoalProgressCard extends StatelessWidget {
               ),
               if (!goal.isCompleted)
                 IconButton(
-                  icon: const Icon(Icons.add_circle_outline,
-                      color: AppColors.amber),
+                  icon: Icon(Icons.add_circle_outline,
+                      color: context.colors.textPrimary),
                   onPressed: onContribute,
                 ),
               IconButton(
@@ -84,7 +84,7 @@ class GoalProgressCard extends StatelessWidget {
             children: [
               Text(goal.currentAmount.asCurrency,
                   style: AppTextStyles.titleMedium.copyWith(
-                      color: goal.isCompleted ? AppColors.green : AppColors.amber)),
+                      color: goal.isCompleted ? AppColors.green : context.colors.textPrimary)),
               Text('${S.budgetOf} ${goal.targetAmount.asCurrency}',
                   style: AppTextStyles.bodyMedium),
             ],
@@ -99,7 +99,7 @@ class GoalProgressCard extends StatelessWidget {
                   minHeight: 10,
                   backgroundColor: context.colors.divider,
                   valueColor: AlwaysStoppedAnimation(
-                      goal.isCompleted ? AppColors.green : AppColors.amber),
+                      goal.isCompleted ? AppColors.green : context.colors.textPrimary),
                 ),
               ),
             ],

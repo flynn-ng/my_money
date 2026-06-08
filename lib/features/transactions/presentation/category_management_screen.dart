@@ -94,7 +94,7 @@ class _CategoryManagementScreenState
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(S.addCategory),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.black,
+                      backgroundColor: context.colors.textPrimary,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       textStyle: AppTextStyles.bodyMedium,
@@ -105,15 +105,15 @@ class _CategoryManagementScreenState
             ),
             Expanded(
               child: categoriesAsync.when(
-                loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.amber)),
+                loading: () => Center(
+                    child: CircularProgressIndicator(color: context.colors.textPrimary)),
                 error: (e, _) => Center(child: Text(friendlyError(e))),
                 data: (cats) {
                   if (cats.isEmpty) {
                     return Center(
                       child: Text(S.noTransactions,
                           style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondary)),
+                              color: context.colors.textSecondary)),
                     );
                   }
 
@@ -233,8 +233,8 @@ class _CategoryRow extends StatelessWidget {
             child: Text(category.name, style: AppTextStyles.bodyLarge),
           ),
           IconButton(
-            icon: const Icon(Icons.edit_outlined,
-                size: 18, color: AppColors.textSecondary),
+            icon: Icon(Icons.edit_outlined,
+                size: 18, color: context.colors.textSecondary),
             onPressed: onEdit,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             padding: EdgeInsets.zero,
@@ -436,11 +436,11 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                               selected: _selectedType == t,
                               onSelected: (_) =>
                                   setState(() => _selectedType = t),
-                              selectedColor: AppColors.black,
+                              selectedColor: context.colors.textPrimary,
                               labelStyle: TextStyle(
                                 color: _selectedType == t
                                     ? Colors.white
-                                    : AppColors.textPrimary,
+                                    : context.colors.textPrimary,
                                 fontSize: 13,
                               ),
                             ),
@@ -471,7 +471,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: selected
-                                    ? AppColors.black
+                                    ? context.colors.textPrimary
                                     : Colors.transparent,
                                 width: 2.5,
                               ),
@@ -491,16 +491,16 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.colors.surface,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         children: [
                           TabBar(
                             controller: _iconTabController,
-                            labelColor: AppColors.black,
-                            unselectedLabelColor: AppColors.textSecondary,
-                            indicatorColor: AppColors.black,
+                            labelColor: context.colors.textPrimary,
+                            unselectedLabelColor: context.colors.textSecondary,
+                            indicatorColor: context.colors.textPrimary,
                             indicatorWeight: 2,
                             labelStyle: AppTextStyles.bodyMedium
                                 .copyWith(fontWeight: FontWeight.w600),
@@ -526,7 +526,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                                           style: AppTextStyles.labelSmall
                                               .copyWith(
                                                   color:
-                                                      AppColors.textSecondary)),
+                                                      context.colors.textSecondary)),
                                       const SizedBox(height: 8),
                                       TextField(
                                         controller: _emojiController,
@@ -574,7 +574,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                                         decoration: BoxDecoration(
                                           color: isSelected
                                               ? colorValue.withValues(alpha: 0.15)
-                                              : AppColors.cream,
+                                              : context.colors.background,
                                           borderRadius:
                                               BorderRadius.circular(8),
                                           border: Border.all(
@@ -589,7 +589,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                                           size: 22,
                                           color: isSelected
                                               ? colorValue
-                                              : AppColors.textSecondary,
+                                              : context.colors.textSecondary,
                                         ),
                                       ),
                                     );
@@ -607,7 +607,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                     FilledButton(
                       onPressed: _loading ? null : _submit,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.black,
+                        backgroundColor: context.colors.textPrimary,
                         minimumSize: const Size.fromHeight(50),
                       ),
                       child: _loading

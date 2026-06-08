@@ -78,22 +78,8 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header row
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 4, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(S.addGoal, style: AppTextStyles.titleMedium),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                color: context.colors.textSecondary,
-                onPressed: () => context.pop(),
-              ),
-            ],
-          ),
-        ),
+        // Unified header
+        SheetHeader(title: S.addGoal),
         Expanded(
           child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -112,10 +98,14 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.amberLight : Colors.white,
+                      color: isSelected
+                          ? context.colors.textPrimary.withValues(alpha: 0.1)
+                          : context.colors.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? AppColors.amber : AppColors.divider,
+                        color: isSelected
+                            ? context.colors.textPrimary
+                            : context.colors.divider,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -192,29 +182,29 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.colors.surface,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 20, color: AppColors.textSecondary),
+                          Icon(Icons.calendar_today_outlined,
+                              size: 20, color: context.colors.textSecondary),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               _deadline != null ? _deadline!.fullDate : S.noDeadline,
                               style: AppTextStyles.bodyLarge.copyWith(
                                 color: _deadline != null
-                                    ? AppColors.textPrimary
-                                    : AppColors.textSecondary,
+                                    ? context.colors.textPrimary
+                                    : context.colors.textSecondary,
                               ),
                             ),
                           ),
                           if (_deadline != null)
                             GestureDetector(
                               onTap: () => setState(() => _deadline = null),
-                              child: const Icon(Icons.close,
-                                  size: 16, color: AppColors.textSecondary),
+                              child: Icon(Icons.close,
+                                  size: 16, color: context.colors.textSecondary),
                             ),
                         ],
                       ),
@@ -227,13 +217,14 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
             FilledButton(
               onPressed: _loading ? null : _submit,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.amber,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.colors.textPrimary,
+                  foregroundColor: context.colors.background,
                   padding: const EdgeInsets.symmetric(vertical: 14)),
               child: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20, width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: context.colors.background))
                   : Text(S.save,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),

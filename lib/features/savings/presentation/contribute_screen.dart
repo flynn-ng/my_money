@@ -67,7 +67,7 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
         backgroundColor: context.colors.background,
         elevation: 0,
         title: Text(widget.goal.name, style: AppTextStyles.titleMedium),
-        leading: CloseButton(color: AppColors.textPrimary),
+        leading: CloseButton(color: context.colors.textPrimary),
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -176,18 +176,18 @@ class _ModeButton extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? color : Colors.white,
+          color: selected ? color : context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: selected ? color : AppColors.divider),
+          border: Border.all(color: selected ? color : context.colors.divider),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: selected ? Colors.white : AppColors.textSecondary, size: 16),
+            Icon(icon, color: selected ? Colors.white : context.colors.textSecondary, size: 16),
             const SizedBox(width: 5),
             Text(label,
                 style: TextStyle(
-                    color: selected ? Colors.white : AppColors.textSecondary,
+                    color: selected ? Colors.white : context.colors.textSecondary,
                     fontWeight: FontWeight.w600,
                     fontSize: 14)),
           ],

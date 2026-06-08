@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_theme.dart';
 import '../../../../core/extensions/currency_ext.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/utils/responsive.dart';
@@ -16,8 +16,11 @@ class MonthlySummaryCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: hPad(context), vertical: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.black, AppColors.blackSoft],
+        gradient: LinearGradient(
+          colors: [
+            context.colors.textPrimary,
+            context.colors.textPrimary.withValues(alpha: 0.85),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -35,12 +38,18 @@ class MonthlySummaryCard extends StatelessWidget {
             child: _SummaryItem(
                 label: S.totalIncome, amount: totals.income, icon: '📈'),
           ),
-          Container(width: 1, height: 50, color: Colors.white30),
+          Container(
+              width: 1,
+              height: 50,
+              color: context.colors.surface.withValues(alpha: 0.3)),
           Expanded(
             child: _SummaryItem(
                 label: S.totalExpense, amount: totals.expense, icon: '📉'),
           ),
-          Container(width: 1, height: 50, color: Colors.white30),
+          Container(
+              width: 1,
+              height: 50,
+              color: context.colors.surface.withValues(alpha: 0.3)),
           Expanded(
             child: _SummaryItem(
                 label: S.netSaved,
@@ -67,12 +76,13 @@ class _SummaryItem extends StatelessWidget {
         Text(icon, style: const TextStyle(fontSize: 20)),
         const SizedBox(height: 4),
         Text(amount.asCompactCurrency,
-            style: AppTextStyles.titleMedium.copyWith(color: Colors.white),
+            style: AppTextStyles.titleMedium
+                .copyWith(color: context.colors.surface),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
         Text(label,
             style: AppTextStyles.labelSmall.copyWith(
-                color: Colors.white.withValues(alpha: 0.8))),
+                color: context.colors.surface.withValues(alpha: 0.8))),
       ],
     );
   }

@@ -46,8 +46,8 @@ class MonthlyBarChart extends StatelessWidget {
                   if (i < 0 || i >= data.length) return const SizedBox.shrink();
                   return Text(
                     DateFormat('MMM', 'vi').format(data[i].month),
-                    style: const TextStyle(
-                        fontSize: 10, color: AppColors.textSecondary),
+                    style: TextStyle(
+                        fontSize: 10, color: context.colors.textSecondary),
                   );
                 },
               ),
