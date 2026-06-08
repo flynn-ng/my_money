@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -55,15 +54,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Gap(32),
-              const Text('🐝', style: TextStyle(fontSize: 56), textAlign: TextAlign.center)
-                  .animate()
-                  .scale(duration: 400.ms, curve: Curves.elasticOut),
+              const Text('🐝', style: TextStyle(fontSize: 56), textAlign: TextAlign.center),
               const Gap(12),
-              Text(S.appName, style: AppTextStyles.displayLarge, textAlign: TextAlign.center)
-                  .animate().fadeIn(delay: 150.ms),
+              Text(S.appName, style: AppTextStyles.displayLarge, textAlign: TextAlign.center),
               const Gap(4),
-              Text(S.tagline, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center)
-                  .animate().fadeIn(delay: 250.ms),
+              Text(S.tagline, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
               const Gap(40),
               FormBuilder(
                 key: _formKey,
@@ -112,13 +107,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : Text(S.signIn,
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-              ).animate().fadeIn(delay: 400.ms),
+              ),
               const Gap(8),
               TextButton(
                 onPressed: () => context.push('/register'),
                 child: Text(S.noAccount,
                     style: AppTextStyles.bodyMedium.copyWith(color: AppColors.amberDark)),
-              ).animate().fadeIn(delay: 500.ms),
+              ),
             ],
           ),
         ),
