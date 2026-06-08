@@ -20,11 +20,13 @@ class TransactionListBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final txAsync = ref.watch(transactionsProvider);
+    ref.watch(transactionRealtimeProvider); // keep WS subscription alive
+    final txAsync = ref.watch(filteredTransactionsProvider);
     return Column(
       children: [
         txAsync.whenData((txs) => _SummaryBar(transactions: txs)).value ??
             const SizedBox.shrink(),
+        const _FilterBar(),
         Expanded(
           child: txAsync.when(
             loading: () => const Center(
@@ -41,6 +43,238 @@ class TransactionListBody extends ConsumerWidget {
     );
   }
 }
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
+
+class _FilterBar extends ConsumerStatefulWidget {
+  const _FilterBar();
+
+  @override
+  ConsumerState<_FilterBar> createState() => _FilterBarState();
+}
+
+class _FilterBarState extends ConsumerState<_FilterBar> {
+  bool _searchOpen = false;
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleSearch() {
+    setState(() => _searchOpen = !_searchOpen);
+    if (!_searchOpen) {
+      _controller.clear();
+      ref.read(transactionFilterProvider.notifier).setQuery('');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filter = ref.watch(transactionFilterProvider);
+    final notifier = ref.read(transactionFilterProvider.notifier);
+    final categoriesAsync = ref.watch(categoriesProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Search row
+        Padding(
+          padding: EdgeInsets.fromLTRB(hPad(context), 4, hPad(context), 0),
+          child: Row(
+            children: [
+              if (_searchOpen)
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    autofocus: true,
+                    style: AppTextStyles.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: S.searchTransactions,
+                      hintStyle: AppTextStyles.bodyMedium
+                          .copyWith(color: AppColors.textSecondary),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: context.colors.surface,
+                      suffixIcon: filter.query.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close, size: 16),
+                              onPressed: () {
+                                _controller.clear();
+                                notifier.setQuery('');
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: notifier.setQuery,
+                  ),
+                )
+              else
+                const Spacer(),
+              Badge(
+                isLabelVisible: filter.isActive,
+                backgroundColor: AppColors.amber,
+                smallSize: 7,
+                child: IconButton(
+                  icon: Icon(
+                    _searchOpen ? Icons.search_off : Icons.search,
+                    size: 22,
+                  ),
+                  onPressed: _toggleSearch,
+                ),
+              ),
+              if (filter.isActive)
+                TextButton(
+                  onPressed: () {
+                    _controller.clear();
+                    setState(() => _searchOpen = false);
+                    notifier.clear();
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.amber,
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(S.clearFilter,
+                      style: AppTextStyles.labelSmall
+                          .copyWith(color: AppColors.amber)),
+                ),
+            ],
+          ),
+        ),
+
+        // Chip row
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: hPad(context)),
+            children: [
+              // All chip
+              _Chip(
+                label: S.filterAll,
+                selected: !filter.isActive,
+                onTap: () {
+                  _controller.clear();
+                  setState(() => _searchOpen = false);
+                  notifier.clear();
+                },
+              ),
+              const SizedBox(width: 6),
+              // Income chip
+              _Chip(
+                label: S.income,
+                selected: filter.typeFilter == TransactionType.income,
+                onTap: () => notifier.setType(
+                  filter.typeFilter == TransactionType.income
+                      ? null
+                      : TransactionType.income,
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Expense chip
+              _Chip(
+                label: S.expense,
+                selected: filter.typeFilter == TransactionType.expense,
+                onTap: () => notifier.setType(
+                  filter.typeFilter == TransactionType.expense
+                      ? null
+                      : TransactionType.expense,
+                ),
+              ),
+              // Category chips
+              ...categoriesAsync.whenData((cats) {
+                return cats.map((cat) {
+                  final isSelected = filter.categoryId == cat.id;
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 6),
+                      _Chip(
+                        label: cat.name,
+                        icon: cat.isEmoji ? cat.icon : null,
+                        selected: isSelected,
+                        onTap: () =>
+                            notifier.setCategory(isSelected ? null : cat.id),
+                      ),
+                    ],
+                  );
+                }).toList();
+              }).value ??
+                  [],
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final String? icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.amber : context.colors.surface,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: context.colors.cardShadow,
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Text(icon!, style: const TextStyle(fontSize: 13)),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: selected ? Colors.white : AppColors.textPrimary,
+                fontWeight:
+                    selected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Summary bar ───────────────────────────────────────────────────────────────
 
 class _SummaryBar extends StatelessWidget {
   final List<TransactionModel> transactions;
@@ -69,9 +303,9 @@ class _SummaryBar extends StatelessWidget {
         child: Row(
           children: [
             _Stat(label: S.income, amount: income, color: AppColors.green, delay: 0),
-            _Divider(),
+            _StatDivider(),
             _Stat(label: S.expense, amount: expense, color: AppColors.red, delay: 80),
-            _Divider(),
+            _StatDivider(),
             _Stat(
               label: S.netSaved,
               amount: net,
@@ -123,11 +357,13 @@ class _Stat extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
+class _StatDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Container(width: 1, height: 28, color: AppColors.divider);
 }
+
+// ── Empty state ───────────────────────────────────────────────────────────────
 
 class _EmptyView extends StatelessWidget {
   const _EmptyView();

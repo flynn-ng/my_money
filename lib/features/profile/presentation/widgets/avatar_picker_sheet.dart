@@ -28,21 +28,11 @@ class AvatarPickerSheet extends StatelessWidget {
     required String currentEmoji,
     required ValueChanged<String> onSelect,
   }) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.85,
-        builder: (_, _) => SheetWrapper(
-          child: AvatarPickerSheet(
-            currentEmoji: currentEmoji,
-            onSelect: onSelect,
-          ),
-        ),
-      ),
+      content: AvatarPickerSheet(currentEmoji: currentEmoji, onSelect: onSelect),
+      initialChildSize: 0.6,
+      maxChildSize: 0.85,
     );
   }
 

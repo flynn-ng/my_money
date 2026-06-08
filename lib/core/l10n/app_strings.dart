@@ -221,6 +221,11 @@ class S {
   static String get activeHousehold => _t('Đang hoạt động', 'Active');
   static String get householdSwitchRow => _t('Hộ gia đình', 'Household');
 
+  // Search & filter
+  static String get searchTransactions => _t('Tìm kiếm...', 'Search...');
+  static String get filterAll => _t('Tất cả', 'All');
+  static String get clearFilter => _t('Xoá', 'Clear');
+
   // Common
   static String get retry => _t('Thử lại', 'Retry');
   static String get cancel => _t('Huỷ', 'Cancel');

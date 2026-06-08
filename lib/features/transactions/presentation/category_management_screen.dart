@@ -6,6 +6,7 @@ import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/responsive.dart';
+import '../../../core/widgets/sheet_wrapper.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/category_model.dart';
 import '../data/transaction_repository.dart';
@@ -29,11 +30,10 @@ class CategoryManagementScreen extends ConsumerStatefulWidget {
 class _CategoryManagementScreenState
     extends ConsumerState<CategoryManagementScreen> {
   Future<void> _showCategoryForm({CategoryModel? existing}) async {
-    await showModalBottomSheet(
+    await showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CategoryFormSheet(existing: existing),
+      content: _CategoryFormSheet(existing: existing),
+      initialChildSize: 0.85,
     );
     ref.invalidate(categoriesProvider);
   }
@@ -364,32 +364,15 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
       color: _selectedColor, type: '', sortOrder: 0,
     ).colorValue;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SafeArea(
         top: false,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag handle
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Container(
-                width: 36, height: 4,
-                decoration: BoxDecoration(
-                  color: context.colors.divider,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
             // Title row
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 4, 8),
+              padding: const EdgeInsets.fromLTRB(16, 4, 4, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -406,7 +389,7 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet>
                 ],
               ),
             ),
-            Flexible(
+            Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(

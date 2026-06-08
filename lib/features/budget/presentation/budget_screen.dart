@@ -48,16 +48,9 @@ class BudgetBody extends ConsumerWidget {
   }
 
   void _showSetBudget(BuildContext context, {dynamic existing}) {
-    showModalBottomSheet(
+    showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.72,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, _) => SheetWrapper(child: SetBudgetScreen(existing: existing)),
-      ),
+      content: SetBudgetScreen(existing: existing),
     );
   }
 }

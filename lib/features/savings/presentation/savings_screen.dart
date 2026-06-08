@@ -41,18 +41,10 @@ class SavingsBody extends ConsumerWidget {
           itemCount: goals.length,
           itemBuilder: (context, i) => GoalProgressCard(
             goal: goals[i],
-            onContribute: () => showModalBottomSheet(
+            onContribute: () => showAppSheet(
               context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => DraggableScrollableSheet(
-                initialChildSize: 0.62,
-                minChildSize: 0.4,
-                maxChildSize: 0.95,
-                builder: (_, _) => SheetWrapper(
-                  child: ContributeScreen(goal: goals[i]),
-                ),
-              ),
+              content: ContributeScreen(goal: goals[i]),
+              initialChildSize: 0.62,
             ),
             onDelete: () async {
               final confirm = await showDialog<bool>(

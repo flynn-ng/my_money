@@ -24,16 +24,10 @@ class AddGoalScreen extends ConsumerStatefulWidget {
   const AddGoalScreen({super.key});
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.78,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, _) => const SheetWrapper(child: AddGoalScreen()),
-      ),
+      content: const AddGoalScreen(),
+      initialChildSize: 0.78,
     );
   }
 

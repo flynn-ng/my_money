@@ -23,18 +23,12 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({super.key, this.transaction});
 
   static Future<void> show(BuildContext context, {TransactionModel? transaction}) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.92,
-        minChildSize: 0.5,
-        maxChildSize: 0.97,
-        builder: (_, _) => SheetWrapper(
-          child: AddTransactionScreen(transaction: transaction),
-        ),
-      ),
+      content: AddTransactionScreen(transaction: transaction),
+      initialChildSize: 0.92,
+      minChildSize: 0.5,
+      maxChildSize: 0.97,
     );
   }
 

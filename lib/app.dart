@@ -230,16 +230,9 @@ class _AppShellState extends ConsumerState<_AppShell> {
   }
 
   void _showAddBudget(BuildContext context) {
-    showModalBottomSheet(
+    showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.72,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, _) => const SheetWrapper(child: SetBudgetScreen()),
-      ),
+      content: const SetBudgetScreen(),
     );
   }
 

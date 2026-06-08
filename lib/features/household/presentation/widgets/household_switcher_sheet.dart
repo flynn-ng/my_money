@@ -13,16 +13,10 @@ class HouseholdSwitcherSheet extends ConsumerStatefulWidget {
   const HouseholdSwitcherSheet({super.key});
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, _) => const SheetWrapper(child: HouseholdSwitcherSheet()),
-      ),
+      content: const HouseholdSwitcherSheet(),
+      initialChildSize: 0.6,
     );
   }
 

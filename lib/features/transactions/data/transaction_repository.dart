@@ -134,3 +134,101 @@ final transactionsProvider =
       .watch(transactionRepositoryProvider)
       .getTransactionsForMonth(profile!.householdId!, month);
 });
+
+// ── Realtime subscription ─────────────────────────────────────────────────────
+
+// Subscribes to INSERT/UPDATE/DELETE on the transactions table for the active
+// household and invalidates transactionsProvider on any change so both partners
+// always see live data without manual refresh.
+final transactionRealtimeProvider = Provider.autoDispose<void>((ref) {
+  final profile = ref.watch(currentProfileProvider).value;
+  if (profile?.householdId == null) return;
+
+  final client = ref.watch(supabaseClientProvider);
+  final householdId = profile!.householdId!;
+
+  final channel = client
+      .channel('transactions_rt_$householdId')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: tableTransactions,
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'household_id',
+          value: householdId,
+        ),
+        callback: (_) => ref.invalidate(transactionsProvider),
+      )
+      .subscribe();
+
+  ref.onDispose(() => client.removeChannel(channel));
+});
+
+// ── Filter state ──────────────────────────────────────────────────────────────
+
+const _sentinel = Object();
+
+class TransactionFilter {
+  final String query;
+  final TransactionType? typeFilter;
+  final String? categoryId;
+
+  const TransactionFilter({this.query = '', this.typeFilter, this.categoryId});
+
+  bool get isActive =>
+      query.isNotEmpty || typeFilter != null || categoryId != null;
+
+  TransactionFilter copyWith({
+    String? query,
+    Object? typeFilter = _sentinel,
+    Object? categoryId = _sentinel,
+  }) =>
+      TransactionFilter(
+        query: query ?? this.query,
+        typeFilter: typeFilter == _sentinel
+            ? this.typeFilter
+            : typeFilter as TransactionType?,
+        categoryId:
+            categoryId == _sentinel ? this.categoryId : categoryId as String?,
+      );
+}
+
+class TransactionFilterNotifier extends Notifier<TransactionFilter> {
+  @override
+  TransactionFilter build() => const TransactionFilter();
+
+  void setQuery(String q) => state = state.copyWith(query: q);
+  void setType(TransactionType? t) =>
+      state = state.copyWith(typeFilter: t);
+  void setCategory(String? id) =>
+      state = state.copyWith(categoryId: id);
+  void clear() => state = const TransactionFilter();
+}
+
+final transactionFilterProvider =
+    NotifierProvider<TransactionFilterNotifier, TransactionFilter>(
+        TransactionFilterNotifier.new);
+
+final filteredTransactionsProvider =
+    FutureProvider<List<TransactionModel>>((ref) async {
+  final all = await ref.watch(transactionsProvider.future);
+  final filter = ref.watch(transactionFilterProvider);
+
+  if (!filter.isActive) return all;
+
+  final q = filter.query.toLowerCase();
+  return all.where((tx) {
+    if (filter.typeFilter != null && tx.txType != filter.typeFilter) {
+      return false;
+    }
+    if (filter.categoryId != null && tx.categoryId != filter.categoryId) {
+      return false;
+    }
+    if (q.isNotEmpty) {
+      return (tx.categoryName?.toLowerCase().contains(q) ?? false) ||
+          (tx.notes?.toLowerCase().contains(q) ?? false);
+    }
+    return true;
+  }).toList();
+});
