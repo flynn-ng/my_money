@@ -33,7 +33,7 @@ class TransactionListBody extends ConsumerWidget {
                 error: e, onRetry: () => ref.invalidate(transactionsProvider)),
             data: (transactions) {
               if (transactions.isEmpty) return const _EmptyView();
-              return _TransactionList(transactions: transactions, ref: ref);
+              return _TransactionList(transactions: transactions);
             },
           ),
         ),
@@ -160,15 +160,35 @@ class _EmptyView extends StatelessWidget {
   }
 }
 
-class _TransactionList extends StatelessWidget {
+class _TransactionList extends ConsumerStatefulWidget {
   final List<TransactionModel> transactions;
-  final WidgetRef ref;
-  const _TransactionList({required this.transactions, required this.ref});
+  const _TransactionList({required this.transactions});
+
+  @override
+  ConsumerState<_TransactionList> createState() => _TransactionListState();
+}
+
+class _TransactionListState extends ConsumerState<_TransactionList> {
+  // IDs removed optimistically so the Dismissible is gone from the tree
+  // synchronously — before any async work or scheduled rebuilds run.
+  final Set<String> _deletedIds = {};
+
+  @override
+  void didUpdateWidget(_TransactionList old) {
+    super.didUpdateWidget(old);
+    // Clear stale IDs once the provider has refreshed and no longer includes them.
+    final currentIds = widget.transactions.map((t) => t.id).toSet();
+    _deletedIds.removeWhere((id) => !currentIds.contains(id));
+  }
 
   @override
   Widget build(BuildContext context) {
+    final visible = widget.transactions
+        .where((t) => !_deletedIds.contains(t.id))
+        .toList();
+
     final grouped = <String, List<TransactionModel>>{};
-    for (final tx in transactions) {
+    for (final tx in visible) {
       grouped.putIfAbsent(tx.date.fullDate, () => []).add(tx);
     }
 
@@ -204,12 +224,11 @@ class _TransactionList extends StatelessWidget {
                   transaction: tx,
                   onTap: () => AddTransactionScreen.show(context, transaction: tx),
                   onDelete: () async {
-                    // Invalidate immediately so the ListView (and the
-                    // dismissed Dismissible) is torn down on this frame.
-                    // Without this, anything that triggers a rebuild before
-                    // the network call completes causes a Flutter assertion:
-                    // "A dismissed Dismissible widget is still part of the tree."
-                    ref.invalidate(transactionsProvider);
+                    // Synchronously remove from the rendered list so the
+                    // Dismissible is gone from the tree before any scheduled
+                    // rebuild (e.g. flutter_animate timers) can fire and trip
+                    // the "dismissed Dismissible still in tree" assertion.
+                    setState(() => _deletedIds.add(tx.id));
                     await ref
                         .read(transactionRepositoryProvider)
                         .deleteTransaction(tx.id);
