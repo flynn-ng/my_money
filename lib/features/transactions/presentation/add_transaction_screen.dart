@@ -17,6 +17,8 @@ import '../../auth/data/auth_repository.dart';
 import '../data/category_model.dart';
 import '../data/transaction_model.dart';
 import '../data/transaction_repository.dart';
+import '../../money_sources/data/money_source_model.dart';
+import '../../money_sources/data/money_source_repository.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final TransactionModel? transaction;
@@ -43,6 +45,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   bool _loading = false;
   TransactionType _type = TransactionType.expense;
   CategoryModel? _selectedCategory;
+  MoneySourceModel? _selectedSource;
   DateTime _date = DateTime.now();
   bool _categoriesInitialized = false;
 
@@ -68,6 +71,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isEditing) _amountFocus.requestFocus();
+      if (_isEditing && widget.transaction!.sourceId != null) {
+        ref.read(moneySourcesProvider.future).then((sources) {
+          if (!mounted) return;
+          final match = sources.where(
+              (s) => s.id == widget.transaction!.sourceId);
+          if (match.isNotEmpty) setState(() => _selectedSource = match.first);
+        });
+      }
     });
   }
 
@@ -104,6 +115,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           'amount': amount,
           'date': _date.toIso8601String().substring(0, 10),
           'notes': notes,
+          'source_id': _selectedSource?.id,
         });
       } else {
         final profile = await ref.read(currentProfileProvider.future);
@@ -118,6 +130,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             date: _date,
             notes: notes,
             createdAt: DateTime.now(),
+            sourceId: _selectedSource?.id,
           ),
         );
       }
@@ -352,7 +365,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ).animate().fadeIn(delay: 100.ms),
 
             Divider(height: 1, color: AppColors.divider),
-            const SizedBox(height: 12),
+
+            // Source picker (only shown when sources exist)
+            _SourcePickerRow(
+              selected: _selectedSource,
+              onSelected: (s) => setState(() => _selectedSource = s),
+            ),
+
+            const SizedBox(height: 4),
 
             // Categories
             Expanded(
@@ -460,6 +480,105 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
           ],
         ),
+    );
+  }
+}
+
+class _SourcePickerRow extends ConsumerWidget {
+  final MoneySourceModel? selected;
+  final ValueChanged<MoneySourceModel?> onSelected;
+
+  const _SourcePickerRow({required this.selected, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sourcesAsync = ref.watch(moneySourcesProvider);
+    return sourcesAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (sources) {
+        if (sources.isEmpty) return const SizedBox.shrink();
+        return SizedBox(
+          height: 42,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            children: [
+              // "No wallet" chip
+              _SourceChip(
+                label: S.noSource,
+                icon: '🚫',
+                color: AppColors.textSecondary,
+                selected: selected == null,
+                onTap: () => onSelected(null),
+              ),
+              const SizedBox(width: 6),
+              ...sources.map((s) => Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: _SourceChip(
+                      label: s.name,
+                      icon: s.icon,
+                      color: s.colorValue,
+                      selected: selected?.id == s.id,
+                      onTap: () =>
+                          onSelected(selected?.id == s.id ? null : s),
+                    ),
+                  )),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SourceChip extends StatelessWidget {
+  final String label;
+  final String icon;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SourceChip({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? color : AppColors.divider,
+            width: 1.2,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 13)),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight:
+                    selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? color : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

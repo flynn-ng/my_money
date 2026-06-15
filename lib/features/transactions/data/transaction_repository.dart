@@ -16,7 +16,7 @@ class TransactionRepository {
     final toStr = DateTime(to.year, to.month + 1, 0).toIso8601String().substring(0, 10);
     final data = await _client
         .from(tableTransactions)
-        .select('*, categories(*), profiles(display_name)')
+        .select('*, categories(*), profiles(display_name), money_sources(name,icon,color)')
         .eq('household_id', householdId)
         .gte('date', fromStr)
         .lte('date', toStr)
@@ -30,7 +30,7 @@ class TransactionRepository {
     final to = DateTime(month.year, month.month + 1, 0).toIso8601String().substring(0, 10);
     final data = await _client
         .from(tableTransactions)
-        .select('*, categories(*), profiles(display_name)')
+        .select('*, categories(*), profiles(display_name), money_sources(name,icon,color)')
         .eq('household_id', householdId)
         .gte('date', from)
         .lte('date', to)
@@ -173,16 +173,23 @@ class TransactionFilter {
   final String query;
   final TransactionType? typeFilter;
   final String? categoryId;
+  final String? sourceId;
 
-  const TransactionFilter({this.query = '', this.typeFilter, this.categoryId});
+  const TransactionFilter({
+    this.query = '',
+    this.typeFilter,
+    this.categoryId,
+    this.sourceId,
+  });
 
   bool get isActive =>
-      query.isNotEmpty || typeFilter != null || categoryId != null;
+      query.isNotEmpty || typeFilter != null || categoryId != null || sourceId != null;
 
   TransactionFilter copyWith({
     String? query,
     Object? typeFilter = _sentinel,
     Object? categoryId = _sentinel,
+    Object? sourceId = _sentinel,
   }) =>
       TransactionFilter(
         query: query ?? this.query,
@@ -191,6 +198,8 @@ class TransactionFilter {
             : typeFilter as TransactionType?,
         categoryId:
             categoryId == _sentinel ? this.categoryId : categoryId as String?,
+        sourceId:
+            sourceId == _sentinel ? this.sourceId : sourceId as String?,
       );
 }
 
@@ -199,10 +208,9 @@ class TransactionFilterNotifier extends Notifier<TransactionFilter> {
   TransactionFilter build() => const TransactionFilter();
 
   void setQuery(String q) => state = state.copyWith(query: q);
-  void setType(TransactionType? t) =>
-      state = state.copyWith(typeFilter: t);
-  void setCategory(String? id) =>
-      state = state.copyWith(categoryId: id);
+  void setType(TransactionType? t) => state = state.copyWith(typeFilter: t);
+  void setCategory(String? id) => state = state.copyWith(categoryId: id);
+  void setSource(String? id) => state = state.copyWith(sourceId: id);
   void clear() => state = const TransactionFilter();
 }
 
@@ -225,9 +233,13 @@ final filteredTransactionsProvider =
     if (filter.categoryId != null && tx.categoryId != filter.categoryId) {
       return false;
     }
+    if (filter.sourceId != null && tx.sourceId != filter.sourceId) {
+      return false;
+    }
     if (q.isNotEmpty) {
       return (tx.categoryName?.toLowerCase().contains(q) ?? false) ||
-          (tx.notes?.toLowerCase().contains(q) ?? false);
+          (tx.notes?.toLowerCase().contains(q) ?? false) ||
+          (tx.sourceName?.toLowerCase().contains(q) ?? false);
     }
     return true;
   }).toList();

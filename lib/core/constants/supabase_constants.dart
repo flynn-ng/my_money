@@ -12,3 +12,4 @@ const tableBudgets = 'budgets';
 const tableSavingsGoals = 'savings_goals';
 const tableSavingsContributions = 'savings_contributions';
 const tableProfileHouseholdMemberships = 'profile_household_memberships';
+const tableMoneySource = 'money_sources';

@@ -224,6 +224,33 @@ class S {
   static String get activeHousehold => _t('Đang hoạt động', 'Active');
   static String get householdSwitchRow => _t('Hộ gia đình', 'Household');
 
+  // Money sources (wallets)
+  static String get tabWallets => _t('Ví', 'Wallets');
+  static String get addMoneySource => _t('Thêm ví', 'Add Wallet');
+  static String get editMoneySource => _t('Sửa ví', 'Edit Wallet');
+  static String get noMoneySource => _t('Chưa có ví', 'No wallets');
+  static String get noMoneySourceHint =>
+      _t('Nhấn + để thêm ví', 'Tap + to add a wallet');
+  static String get sourceName => _t('Tên ví', 'Wallet name');
+  static String get sourceType => _t('Loại', 'Type');
+  static String get sourceInitialBalance =>
+      _t('Số dư ban đầu', 'Initial balance');
+  static String get sourceBalance => _t('Số dư', 'Balance');
+  static String get sourceTypeCash => _t('Tiền mặt', 'Cash');
+  static String get sourceTypeBank => _t('Ngân hàng', 'Bank');
+  static String get sourceTypeProperty => _t('Tài sản', 'Property');
+  static String get sourceTypeInvestment => _t('Đầu tư', 'Investment');
+  static String get sourceTypeOther => _t('Khác', 'Other');
+  static String get selectSource => _t('Chọn ví', 'Select wallet');
+  static String get noSource => _t('Không có ví', 'No wallet');
+  static String get deleteSourceTitle => _t('Xoá ví?', 'Delete wallet?');
+  static String deleteSourceContent(String name) => _t(
+        'Xoá ví "$name" vĩnh viễn.',
+        'Delete wallet "$name" permanently.',
+      );
+  static String get totalBalance => _t('Tổng số dư', 'Total balance');
+  static String get sourceColor => _t('Màu', 'Color');
+
   // Search & filter
   static String get searchTransactions => _t('Tìm kiếm...', 'Search...');
   static String get filterAll => _t('Tất cả', 'All');

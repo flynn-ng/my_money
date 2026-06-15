@@ -19,6 +19,7 @@ import 'features/profile/data/locale_provider.dart';
 import 'features/profile/data/theme_provider.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/reports/presentation/reports_screen.dart';
+import 'features/money_sources/presentation/add_money_source_screen.dart';
 import 'features/savings/presentation/add_goal_screen.dart';
 import 'features/transactions/presentation/add_transaction_screen.dart';
 
@@ -164,6 +165,14 @@ class _AppShellState extends ConsumerState<_AppShell> {
       case 2:
         return FloatingActionButton(
           onPressed: () => AddGoalScreen.show(context),
+          backgroundColor: context.colors.textPrimary,
+          foregroundColor: context.colors.background,
+          elevation: 4,
+          child: const Icon(Icons.add, size: 28),
+        );
+      case 3:
+        return FloatingActionButton(
+          onPressed: () => AddMoneySourceScreen.show(context),
           backgroundColor: context.colors.textPrimary,
           foregroundColor: context.colors.background,
           elevation: 4,

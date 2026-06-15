@@ -8,6 +8,7 @@ import '../../../core/utils/responsive.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../budget/presentation/budget_screen.dart';
 import '../../savings/presentation/savings_screen.dart';
+import '../../money_sources/presentation/money_sources_screen.dart';
 import '../../transactions/data/transaction_repository.dart';
 import '../../transactions/presentation/transaction_list_screen.dart';
 
@@ -36,7 +37,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-        length: 3, vsync: this, initialIndex: ref.read(financeTabProvider));
+        length: 4, vsync: this, initialIndex: ref.read(financeTabProvider));
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         ref.read(financeTabProvider.notifier).setIndex(_tabController.index);
@@ -77,6 +78,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
                   Tab(text: S.tabTransactions),
                   Tab(text: S.tabBudget),
                   Tab(text: S.tabSavings),
+                  Tab(text: S.tabWallets),
                 ],
               ),
             ),
@@ -89,6 +91,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
                   TransactionListBody(),
                   BudgetBody(),
                   SavingsBody(),
+                  MoneySourcesBody(),
                 ],
               ),
             ),

@@ -11,11 +11,16 @@ class TransactionModel {
   final String? notes;
   final DateTime createdAt;
 
+  final String? sourceId;
+
   // Joined data
   final String? categoryName;
   final String? categoryIcon;
   final String? categoryColor;
   final String? paidByName;
+  final String? sourceName;
+  final String? sourceIcon;
+  final String? sourceColor;
 
   const TransactionModel({
     required this.id,
@@ -27,15 +32,20 @@ class TransactionModel {
     required this.date,
     this.notes,
     required this.createdAt,
+    this.sourceId,
     this.categoryName,
     this.categoryIcon,
     this.categoryColor,
     this.paidByName,
+    this.sourceName,
+    this.sourceIcon,
+    this.sourceColor,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     final category = json['categories'] as Map<String, dynamic>?;
     final profile = json['profiles'] as Map<String, dynamic>?;
+    final source = json['money_sources'] as Map<String, dynamic>?;
     return TransactionModel(
       id: json['id'] as String,
       householdId: json['household_id'] as String,
@@ -46,10 +56,14 @@ class TransactionModel {
       date: DateTime.parse(json['date'] as String),
       notes: json['notes'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
+      sourceId: json['source_id'] as String?,
       categoryName: category?['name'] as String?,
       categoryIcon: category?['icon'] as String?,
       categoryColor: category?['color'] as String?,
       paidByName: profile?['display_name'] as String?,
+      sourceName: source?['name'] as String?,
+      sourceIcon: source?['icon'] as String?,
+      sourceColor: source?['color'] as String?,
     );
   }
 
@@ -63,5 +77,6 @@ class TransactionModel {
         'amount': amount,
         'date': date.toIso8601String().substring(0, 10),
         if (notes != null) 'notes': notes,
+        'source_id': sourceId,
       };
 }
