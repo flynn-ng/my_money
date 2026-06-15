@@ -376,35 +376,42 @@ class _SegmentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: context.colors.textSecondary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(label,
-                style: AppTextStyles.bodyMedium
-                    .copyWith(color: context.colors.textPrimary)),
+          Row(
+            children: [
+              Icon(icon, size: 18, color: context.colors.textSecondary),
+              const SizedBox(width: 12),
+              Text(label,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: context.colors.textPrimary)),
+            ],
           ),
-          const SizedBox(width: 8),
-          SegmentedButton<Object>(
-            style: SegmentedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              textStyle: AppTextStyles.labelSmall,
-              selectedBackgroundColor: context.colors.textPrimary,
-              selectedForegroundColor: context.colors.background,
-              foregroundColor: context.colors.textSecondary,
-              side: BorderSide(color: context.colors.divider),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<Object>(
+              style: SegmentedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: AppTextStyles.labelSmall,
+                selectedBackgroundColor: context.colors.textPrimary,
+                selectedForegroundColor: context.colors.background,
+                foregroundColor: context.colors.textSecondary,
+                side: BorderSide(color: context.colors.divider),
+              ),
+              segments: segments
+                  .map((s) => ButtonSegment<Object>(
+                        value: s.$1,
+                        icon: s.$2 != null ? Icon(s.$2, size: 14) : null,
+                        label: Text(s.$3),
+                      ))
+                  .toList(),
+              selected: {selected},
+              onSelectionChanged: (set) => onChanged(set.first),
+              showSelectedIcon: false,
             ),
-            segments: segments
-                .map((s) => ButtonSegment<Object>(
-                      value: s.$1,
-                      icon: s.$2 != null ? Icon(s.$2, size: 14) : null,
-                      label: Text(s.$3),
-                    ))
-                .toList(),
-            selected: {selected},
-            onSelectionChanged: (set) => onChanged(set.first),
-            showSelectedIcon: false,
           ),
         ],
       ),
