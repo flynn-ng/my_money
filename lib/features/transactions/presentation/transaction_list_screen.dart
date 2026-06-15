@@ -8,7 +8,9 @@ import '../../../core/extensions/currency_ext.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../core/widgets/error_display.dart';
+import '../data/category_model.dart';
 import '../data/transaction_model.dart';
 import '../data/transaction_repository.dart';
 import 'add_transaction_screen.dart';
@@ -153,69 +155,99 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
         ),
 
         // Chip row
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: hPad(context)),
-            children: [
-              // All chip
-              _Chip(
-                label: S.filterAll,
-                selected: !filter.isActive,
-                onTap: () {
-                  _controller.clear();
-                  setState(() => _searchOpen = false);
-                  notifier.clear();
-                },
-              ),
-              const SizedBox(width: 6),
-              // Income chip
-              _Chip(
-                label: S.income,
-                selected: filter.typeFilter == TransactionType.income,
-                onTap: () => notifier.setType(
-                  filter.typeFilter == TransactionType.income
-                      ? null
-                      : TransactionType.income,
-                ),
-              ),
-              const SizedBox(width: 6),
-              // Expense chip
-              _Chip(
-                label: S.expense,
-                selected: filter.typeFilter == TransactionType.expense,
-                onTap: () => notifier.setType(
-                  filter.typeFilter == TransactionType.expense
-                      ? null
-                      : TransactionType.expense,
-                ),
-              ),
-              // Category chips
-              ...categoriesAsync.whenData((cats) {
-                return cats.map((cat) {
-                  final isSelected = filter.categoryId == cat.id;
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(width: 6),
-                      _Chip(
-                        label: cat.name,
-                        icon: cat.isEmoji ? cat.icon : null,
-                        selected: isSelected,
-                        onTap: () =>
-                            notifier.setCategory(isSelected ? null : cat.id),
-                      ),
-                    ],
-                  );
-                }).toList();
-              }).value ??
-                  [],
-            ],
-          ),
+        _ChipRow(
+          filter: filter,
+          categoriesAsync: categoriesAsync,
+          onClearAll: () {
+            _controller.clear();
+            setState(() => _searchOpen = false);
+            notifier.clear();
+          },
+          onTypeFilter: notifier.setType,
+          onCategoryFilter: notifier.setCategory,
         ),
         const SizedBox(height: 4),
       ],
+    );
+  }
+}
+
+class _ChipRow extends StatelessWidget {
+  final TransactionFilter filter;
+  final AsyncValue<List<CategoryModel>> categoriesAsync;
+  final VoidCallback onClearAll;
+  final void Function(TransactionType?) onTypeFilter;
+  final void Function(String?) onCategoryFilter;
+
+  const _ChipRow({
+    required this.filter,
+    required this.categoriesAsync,
+    required this.onClearAll,
+    required this.onTypeFilter,
+    required this.onCategoryFilter,
+  });
+
+  List<Widget> _buildChips(BuildContext context) {
+    final chips = <Widget>[
+      _Chip(
+        label: S.filterAll,
+        selected: !filter.isActive,
+        onTap: onClearAll,
+      ),
+      _Chip(
+        label: S.income,
+        selected: filter.typeFilter == TransactionType.income,
+        onTap: () => onTypeFilter(
+          filter.typeFilter == TransactionType.income ? null : TransactionType.income,
+        ),
+      ),
+      _Chip(
+        label: S.expense,
+        selected: filter.typeFilter == TransactionType.expense,
+        onTap: () => onTypeFilter(
+          filter.typeFilter == TransactionType.expense ? null : TransactionType.expense,
+        ),
+      ),
+      ...categoriesAsync.whenData((cats) {
+        return cats.map((cat) {
+          final isSelected = filter.categoryId == cat.id;
+          return _Chip(
+            label: cat.name,
+            icon: cat.isEmoji ? cat.icon : null,
+            selected: isSelected,
+            onTap: () => onCategoryFilter(isSelected ? null : cat.id),
+          );
+        }).toList();
+      }).value ?? [],
+    ];
+    return chips;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isWide = kIsWeb && MediaQuery.sizeOf(context).width >= kMaxContent;
+    final chips = _buildChips(context);
+
+    if (isWide) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(hPad(context), 4, hPad(context), 4),
+        child: Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: chips,
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: hPad(context)),
+        itemCount: chips.length,
+        separatorBuilder: (context, i) => const SizedBox(width: 6),
+        itemBuilder: (_, i) => chips[i],
+      ),
     );
   }
 }
