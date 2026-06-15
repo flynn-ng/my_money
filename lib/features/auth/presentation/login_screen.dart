@@ -112,7 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               TextButton(
                 onPressed: () => context.push('/register'),
                 child: Text(S.noAccount,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.amberDark)),
+                    style: AppTextStyles.bodyMedium.copyWith(color: context.colors.textPrimary)),
               ),
             ],
           ),
