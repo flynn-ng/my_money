@@ -170,10 +170,10 @@ class S {
       _t('Đang tham gia hộ gia đình...', 'Joining household...');
   static String shareInviteText(String code) => _t(
         'Tham gia hộ gia đình của mình trên My Moneyyy!!!\n'
-        'Nhấn vào đây để tự động vào: https://mymoneyyy.pages.dev/join/$code\n'
+        'Nhấn vào đây để tự động vào: https://de-money.pages.dev/join/$code\n'
         'Hoặc nhập mã thủ công: $code',
         'Join my household on My Moneyyy!!!\n'
-        'Tap here to join automatically: https://mymoneyyy.pages.dev/join/$code\n'
+        'Tap here to join automatically: https://de-money.pages.dev/join/$code\n'
         'Or enter the code manually: $code',
       );
 
