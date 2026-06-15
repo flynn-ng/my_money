@@ -71,14 +71,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isEditing) _amountFocus.requestFocus();
-      if (_isEditing && widget.transaction!.sourceId != null) {
-        ref.read(moneySourcesProvider.future).then((sources) {
-          if (!mounted) return;
-          final match = sources.where(
-              (s) => s.id == widget.transaction!.sourceId);
-          if (match.isNotEmpty) setState(() => _selectedSource = match.first);
+      ref.read(moneySourcesProvider.future).then((sources) {
+        if (!mounted || sources.isEmpty) return;
+        setState(() {
+          if (_isEditing) {
+            final match = sources.where((s) => s.id == widget.transaction!.sourceId);
+            if (match.isNotEmpty) _selectedSource = match.first;
+          } else {
+            _selectedSource = sources.first;
+          }
         });
-      }
+      });
     });
   }
 
@@ -549,28 +552,16 @@ class _SourcePickerRow extends ConsumerWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            children: [
-              // "No wallet" chip
-              _SourceChip(
-                label: S.noSource,
-                icon: '🚫',
-                color: AppColors.textSecondary,
-                selected: selected == null,
-                onTap: () => onSelected(null),
-              ),
-              const SizedBox(width: 6),
-              ...sources.map((s) => Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: _SourceChip(
-                      label: s.name,
-                      icon: s.icon,
-                      color: s.colorValue,
-                      selected: selected?.id == s.id,
-                      onTap: () =>
-                          onSelected(selected?.id == s.id ? null : s),
-                    ),
-                  )),
-            ],
+            children: sources.map((s) => Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: _SourceChip(
+                    label: s.name,
+                    icon: s.icon,
+                    color: s.colorValue,
+                    selected: selected?.id == s.id,
+                    onTap: () => onSelected(s),
+                  ),
+                )).toList(),
           ),
         );
       },

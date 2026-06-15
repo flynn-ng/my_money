@@ -443,34 +443,46 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
   // IDs removed optimistically so the Dismissible is gone from the tree
   // synchronously — before any async work or scheduled rebuilds run.
   final Set<String> _deletedIds = {};
+  late Map<String, List<TransactionModel>> _grouped;
+  late List<String> _keys;
+
+  @override
+  void initState() {
+    super.initState();
+    _rebuildGroups();
+  }
 
   @override
   void didUpdateWidget(_TransactionList old) {
     super.didUpdateWidget(old);
-    // Clear stale IDs once the provider has refreshed and no longer includes them.
-    final currentIds = widget.transactions.map((t) => t.id).toSet();
-    _deletedIds.removeWhere((id) => !currentIds.contains(id));
+    if (_deletedIds.isNotEmpty) {
+      final currentIds = widget.transactions.map((t) => t.id).toSet();
+      _deletedIds.removeWhere((id) => !currentIds.contains(id));
+    }
+    if (!identical(widget.transactions, old.transactions)) {
+      _rebuildGroups();
+    }
+  }
+
+  void _rebuildGroups() {
+    final grouped = <String, List<TransactionModel>>{};
+    for (final tx in widget.transactions) {
+      if (!_deletedIds.contains(tx.id)) {
+        grouped.putIfAbsent(tx.date.fullDate, () => []).add(tx);
+      }
+    }
+    _grouped = grouped;
+    _keys = grouped.keys.toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final visible = widget.transactions
-        .where((t) => !_deletedIds.contains(t.id))
-        .toList();
-
-    final grouped = <String, List<TransactionModel>>{};
-    for (final tx in visible) {
-      grouped.putIfAbsent(tx.date.fullDate, () => []).add(tx);
-    }
-
-    final keys = grouped.keys.toList();
-
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 88),
-      itemCount: keys.length,
+      itemCount: _keys.length,
       itemBuilder: (context, i) {
-        final date = keys[i];
-        final dayTxs = grouped[date]!;
+        final date = _keys[i];
+        final dayTxs = _grouped[date]!;
         final net = dayTxs.fold<double>(
             0, (s, tx) => s + (tx.txType == TransactionType.expense ? -tx.amount : tx.amount));
 
@@ -490,7 +502,8 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
                   ),
                 ],
               ),
-            ).animate(delay: (i * 30).ms).fadeIn(duration: 200.ms),
+            ).animate(delay: Duration(milliseconds: (i * 30).clamp(0, 300)))
+                .fadeIn(duration: 200.ms),
             ...dayTxs.mapIndexed((j, tx) => TransactionTile(
                   transaction: tx,
                   onTap: () => AddTransactionScreen.show(context, transaction: tx),
@@ -499,13 +512,16 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
                     // Dismissible is gone from the tree before any scheduled
                     // rebuild (e.g. flutter_animate timers) can fire and trip
                     // the "dismissed Dismissible still in tree" assertion.
-                    setState(() => _deletedIds.add(tx.id));
+                    setState(() {
+                      _deletedIds.add(tx.id);
+                      _rebuildGroups();
+                    });
                     await ref
                         .read(transactionRepositoryProvider)
                         .deleteTransaction(tx.id);
                     ref.invalidate(transactionsProvider);
                   },
-                ).animate(delay: (i * 30 + j * 20).ms)
+                ).animate(delay: Duration(milliseconds: (i * 30 + j * 20).clamp(0, 400)))
                     .fadeIn(duration: 250.ms)
                     .slideX(begin: 0.04, curve: Curves.easeOut)),
           ],
