@@ -153,31 +153,70 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                   const Gap(12),
                   GestureDetector(
                     onTap: () async {
-                      DateTime temp = _deadline ?? DateTime.now().add(const Duration(days: 30));
+                      final now = DateTime.now();
+                      DateTime temp = _deadline ?? now.add(const Duration(days: 30));
                       await showCupertinoModalPopup<void>(
                         context: context,
-                        builder: (_) => Container(
-                          height: 280,
+                        builder: (modalCtx) => Container(
                           color: CupertinoColors.systemBackground.resolveFrom(context),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Toolbar
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom: BorderSide(
+                                          color: AppColors.divider, width: 0.5)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    CupertinoButton(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      onPressed: () => Navigator.pop(modalCtx),
+                                      child: Text(S.cancel,
+                                          style: const TextStyle(
+                                              color: CupertinoColors.systemGrey)),
+                                    ),
+                                    const Spacer(),
+                                    if (_deadline != null)
+                                      CupertinoButton(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        onPressed: () {
+                                          setState(() => _deadline = null);
+                                          Navigator.pop(modalCtx);
+                                        },
+                                        child: Text(S.clearDate,
+                                            style: const TextStyle(
+                                                color: CupertinoColors.destructiveRed)),
+                                      ),
+                                    const Spacer(),
+                                    CupertinoButton(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      onPressed: () {
+                                        setState(() => _deadline = temp);
+                                        Navigator.pop(modalCtx);
+                                      },
+                                      child: Text(S.done,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600)),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               SizedBox(
-                                height: 220,
+                                height: 216,
                                 child: CupertinoDatePicker(
                                   mode: CupertinoDatePickerMode.date,
                                   initialDateTime: temp,
-                                  minimumDate: DateTime.now(),
-                                  maximumDate: DateTime.now().add(const Duration(days: 365 * 10)),
+                                  minimumDate: now,
+                                  maximumDate: now.add(const Duration(days: 365 * 10)),
                                   onDateTimeChanged: (d) => temp = d,
                                 ),
                               ),
-                              CupertinoButton(
-                                child: Text(S.done),
-                                onPressed: () {
-                                  setState(() => _deadline = temp);
-                                  Navigator.pop(context);
-                                },
-                              ),
+                              SizedBox(
+                                  height: MediaQuery.of(context).padding.bottom),
                             ],
                           ),
                         ),

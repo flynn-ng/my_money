@@ -298,31 +298,77 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       DateTime temp = _date;
                       await showCupertinoModalPopup<void>(
                         context: context,
-                        builder: (modalCtx) => Container(
-                          height: 280,
-                          color: CupertinoColors.systemBackground.resolveFrom(context),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 220,
-                                child: CupertinoDatePicker(
-                                  mode: CupertinoDatePickerMode.date,
-                                  initialDateTime: _date,
-                                  maximumDate: DateTime.now(),
-                                  minimumDate: DateTime(2020),
-                                  onDateTimeChanged: (d) => temp = d,
+                        builder: (modalCtx) {
+                          final today = DateTime.now();
+                          final yesterday = today.subtract(const Duration(days: 1));
+                          return Container(
+                            color: CupertinoColors.systemBackground.resolveFrom(context),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Toolbar
+                                Container(
+                                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: AppColors.divider, width: 0.5)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CupertinoButton(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        onPressed: () => Navigator.pop(modalCtx),
+                                        child: Text(S.cancel,
+                                            style: const TextStyle(
+                                                color: CupertinoColors.systemGrey)),
+                                      ),
+                                      const Spacer(),
+                                      _QuickDateChip(
+                                        label: S.today,
+                                        onTap: () {
+                                          setState(() => _date = today);
+                                          Navigator.pop(modalCtx);
+                                        },
+                                      ),
+                                      const SizedBox(width: 6),
+                                      _QuickDateChip(
+                                        label: S.yesterday,
+                                        onTap: () {
+                                          setState(() => _date = yesterday);
+                                          Navigator.pop(modalCtx);
+                                        },
+                                      ),
+                                      const Spacer(),
+                                      CupertinoButton(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        onPressed: () {
+                                          setState(() => _date = temp);
+                                          Navigator.pop(modalCtx);
+                                        },
+                                        child: Text(S.done,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600)),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              CupertinoButton(
-                                child: Text(S.done),
-                                onPressed: () {
-                                  setState(() => _date = temp);
-                                  Navigator.pop(modalCtx);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
+                                SizedBox(
+                                  height: 216,
+                                  child: CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.date,
+                                    initialDateTime: _date,
+                                    maximumDate: today,
+                                    minimumDate: DateTime(2020),
+                                    onDateTimeChanged: (d) => temp = d,
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).padding.bottom),
+                              ],
+                            ),
+                          );
+                        },
                       );
                     },
                     child: Container(
@@ -578,6 +624,33 @@ class _SourceChip extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _QuickDateChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickDateChip({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.cream,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Text(label,
+            style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary)),
       ),
     );
   }

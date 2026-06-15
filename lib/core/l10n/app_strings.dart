@@ -262,4 +262,7 @@ class S {
   static String get delete => _t('Xoá', 'Delete');
   static String get copyCode => _t('Sao chép', 'Copy');
   static String get done => _t('Xong', 'Done');
+  static String get today => _t('Hôm nay', 'Today');
+  static String get yesterday => _t('Hôm qua', 'Yesterday');
+  static String get clearDate => _t('Xoá ngày', 'Clear date');
 }
