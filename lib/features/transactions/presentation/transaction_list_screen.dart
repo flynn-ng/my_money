@@ -26,8 +26,11 @@ class TransactionListBody extends ConsumerWidget {
     final txAsync = ref.watch(filteredTransactionsProvider);
     return Column(
       children: [
-        txAsync.whenData((txs) => _SummaryBar(transactions: txs)).value ??
-            const SizedBox.shrink(),
+        txAsync.when(
+          data: (txs) => _SummaryBar(transactions: txs),
+          loading: () => const SizedBox.shrink(),
+          error: (e, _) => const SizedBox.shrink(),
+        ),
         const _FilterBar(),
         Expanded(
           child: txAsync.when(

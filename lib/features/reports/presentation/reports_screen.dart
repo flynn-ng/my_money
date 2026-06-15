@@ -31,8 +31,6 @@ class ReportsScreen extends ConsumerWidget {
           color: AppColors.amber,
           onRefresh: () async {
             ref.invalidate(transactionsProvider);
-            ref.invalidate(categorySpendingProvider);
-            ref.invalidate(monthlyTotalsProvider);
             ref.invalidate(last6MonthsProvider);
           },
           child: CustomScrollView(

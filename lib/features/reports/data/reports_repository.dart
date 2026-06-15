@@ -35,29 +35,27 @@ class MonthlyTotal {
 
 class ReportsRepository {
   List<CategorySpending> spendingByCategory(List<TransactionModel> transactions) {
-    final map = <String, CategorySpending>{};
+    final amounts = <String, double>{};
+    final meta = <String, (String, String, String)>{};
     for (final tx in transactions) {
       if (tx.txType != TransactionType.expense) continue;
-      if (map.containsKey(tx.categoryId)) {
-        final existing = map[tx.categoryId]!;
-        map[tx.categoryId] = CategorySpending(
-          categoryId: existing.categoryId,
-          categoryName: existing.categoryName,
-          categoryIcon: existing.categoryIcon,
-          categoryColor: existing.categoryColor,
-          amount: existing.amount + tx.amount,
-        );
-      } else {
-        map[tx.categoryId] = CategorySpending(
-          categoryId: tx.categoryId,
-          categoryName: tx.categoryName ?? 'Unknown',
-          categoryIcon: tx.categoryIcon ?? '📦',
-          categoryColor: tx.categoryColor ?? '#78716C',
-          amount: tx.amount,
-        );
-      }
+      amounts[tx.categoryId] = (amounts[tx.categoryId] ?? 0) + tx.amount;
+      meta[tx.categoryId] ??= (
+        tx.categoryName ?? 'Unknown',
+        tx.categoryIcon ?? '📦',
+        tx.categoryColor ?? '#78716C',
+      );
     }
-    final result = map.values.toList();
+    final result = amounts.entries.map((e) {
+      final (name, icon, color) = meta[e.key]!;
+      return CategorySpending(
+        categoryId: e.key,
+        categoryName: name,
+        categoryIcon: icon,
+        categoryColor: color,
+        amount: e.value,
+      );
+    }).toList();
     result.sort((a, b) => b.amount.compareTo(a.amount));
     return result;
   }
