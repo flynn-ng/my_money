@@ -6,7 +6,6 @@ import 'core/constants/app_colors.dart';
 import 'core/constants/app_text_styles.dart';
 import 'core/constants/app_theme.dart';
 import 'core/l10n/app_strings.dart';
-import 'core/widgets/sheet_wrapper.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/presentation/household_link_screen.dart';
 import 'features/auth/presentation/join_screen.dart';
@@ -230,10 +229,7 @@ class _AppShellState extends ConsumerState<_AppShell> {
   }
 
   void _showAddBudget(BuildContext context) {
-    showAppSheet(
-      context: context,
-      content: const SetBudgetScreen(),
-    );
+    SetBudgetScreen.show(context);
   }
 
   @override

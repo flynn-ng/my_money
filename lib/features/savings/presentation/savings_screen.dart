@@ -5,7 +5,6 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_display.dart';
 import '../../../core/widgets/loading_overlay.dart';
-import '../../../core/widgets/sheet_wrapper.dart';
 import '../data/savings_repository.dart';
 import 'add_goal_screen.dart';
 import 'contribute_screen.dart';
@@ -41,11 +40,7 @@ class SavingsBody extends ConsumerWidget {
           itemCount: goals.length,
           itemBuilder: (context, i) => GoalProgressCard(
             goal: goals[i],
-            onContribute: () => showAppSheet(
-              context: context,
-              content: ContributeScreen(goal: goals[i]),
-              initialChildSize: 0.62,
-            ),
+            onContribute: () => ContributeScreen.show(context, goal: goals[i]),
             onDelete: () async {
               final confirm = await showDialog<bool>(
                 context: context,

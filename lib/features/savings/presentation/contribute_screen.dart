@@ -10,6 +10,7 @@ import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/thousands_formatter.dart';
+import '../../../core/widgets/sheet_wrapper.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/savings_model.dart';
 import '../data/savings_repository.dart';
@@ -17,6 +18,14 @@ import '../data/savings_repository.dart';
 class ContributeScreen extends ConsumerStatefulWidget {
   final SavingsGoalModel goal;
   const ContributeScreen({super.key, required this.goal});
+
+  static Future<void> show(BuildContext context, {required SavingsGoalModel goal}) {
+    return showAppSheet(
+      context: context,
+      content: ContributeScreen(goal: goal),
+      initialChildSize: 0.62,
+    );
+  }
 
   @override
   ConsumerState<ContributeScreen> createState() => _ContributeScreenState();
@@ -61,94 +70,104 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      appBar: AppBar(
-        backgroundColor: context.colors.background,
-        elevation: 0,
-        title: Text(widget.goal.name, style: AppTextStyles.titleMedium),
-        leading: CloseButton(color: AppColors.textPrimary),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(widget.goal.icon,
-                style: const TextStyle(fontSize: 44), textAlign: TextAlign.center),
-            const Gap(12),
-            Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 4, 0),
+          child: Row(
+            children: [
+              Text('${widget.goal.icon}  ${widget.goal.name}',
+                  style: AppTextStyles.titleMedium),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.close),
+                color: context.colors.textSecondary,
+                onPressed: () => context.pop(),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: _ModeButton(
-                    label: S.contribute,
-                    icon: Icons.add_circle_outline,
-                    selected: !_isWithdrawal,
-                    color: AppColors.green,
-                    onTap: () => setState(() => _isWithdrawal = false),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ModeButton(
+                        label: S.contribute,
+                        icon: Icons.add_circle_outline,
+                        selected: !_isWithdrawal,
+                        color: AppColors.green,
+                        onTap: () => setState(() => _isWithdrawal = false),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ModeButton(
+                        label: S.withdraw,
+                        icon: Icons.remove_circle_outline,
+                        selected: _isWithdrawal,
+                        color: AppColors.red,
+                        onTap: () => setState(() => _isWithdrawal = true),
+                      ),
+                    ),
+                  ],
+                ),
+                const Gap(16),
+                FormBuilder(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      FormBuilderTextField(
+                        name: 'amount',
+                        decoration: InputDecoration(
+                          labelText: S.contributeAmount,
+                          prefixIcon: const Icon(Icons.payments_outlined),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [ThousandsSeparatorFormatter()],
+                        style: AppTextStyles.amountLarge,
+                        valueTransformer: (v) =>
+                            ThousandsSeparatorFormatter.parse(v ?? ''),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                          FormBuilderValidators.min(0.01),
+                        ]),
+                      ),
+                      const Gap(12),
+                      FormBuilderTextField(
+                        name: 'notes',
+                        decoration: InputDecoration(
+                          labelText: S.notes,
+                          prefixIcon: const Icon(Icons.notes_outlined),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _ModeButton(
-                    label: S.withdraw,
-                    icon: Icons.remove_circle_outline,
-                    selected: _isWithdrawal,
-                    color: AppColors.red,
-                    onTap: () => setState(() => _isWithdrawal = true),
-                  ),
+                const Gap(20),
+                FilledButton(
+                  onPressed: _loading ? null : _submit,
+                  style: FilledButton.styleFrom(
+                      backgroundColor: _isWithdrawal ? AppColors.red : AppColors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14)),
+                  child: _loading
+                      ? const SizedBox(
+                          height: 20, width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : Text(_isWithdrawal ? S.withdraw : S.contribute,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
-            const Gap(16),
-            FormBuilder(
-              key: _formKey,
-              child: Column(
-                children: [
-                  FormBuilderTextField(
-                    name: 'amount',
-                    decoration: InputDecoration(
-                      labelText: S.contributeAmount,
-                      prefixIcon: const Icon(Icons.payments_outlined),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [ThousandsSeparatorFormatter()],
-                    style: AppTextStyles.amountLarge,
-                    valueTransformer: (v) =>
-                        ThousandsSeparatorFormatter.parse(v ?? ''),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.min(0.01),
-                    ]),
-                  ),
-                  const Gap(12),
-                  FormBuilderTextField(
-                    name: 'notes',
-                    decoration: InputDecoration(
-                      labelText: S.notes,
-                      prefixIcon: const Icon(Icons.notes_outlined),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Gap(20),
-            FilledButton(
-              onPressed: _loading ? null : _submit,
-              style: FilledButton.styleFrom(
-                  backgroundColor: _isWithdrawal ? AppColors.red : AppColors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: _loading
-                  ? const SizedBox(
-                      height: 20, width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text(_isWithdrawal ? S.withdraw : S.contribute,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

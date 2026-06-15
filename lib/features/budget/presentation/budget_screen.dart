@@ -5,7 +5,7 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_display.dart';
 import '../../../core/widgets/loading_overlay.dart';
-import '../../../core/widgets/sheet_wrapper.dart';
+import '../data/budget_model.dart';
 import '../data/budget_repository.dart';
 import 'set_budget_screen.dart';
 import 'widgets/budget_progress_card.dart';
@@ -47,10 +47,7 @@ class BudgetBody extends ConsumerWidget {
     );
   }
 
-  void _showSetBudget(BuildContext context, {dynamic existing}) {
-    showAppSheet(
-      context: context,
-      content: SetBudgetScreen(existing: existing),
-    );
+  void _showSetBudget(BuildContext context, {BudgetModel? existing}) {
+    SetBudgetScreen.show(context, existing: existing);
   }
 }

@@ -160,15 +160,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         children: [
           // Top bar
           Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 4, 4, 0),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    color: context.colors.textSecondary,
-                    onPressed: () => context.pop(),
-                  ),
-                  const Spacer(),
                   // Type toggle — minimal pills
                   Container(
                     padding: const EdgeInsets.all(3),
@@ -192,6 +186,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    color: context.colors.textSecondary,
+                    onPressed: () => context.pop(),
                   ),
                 ],
               ),
@@ -285,7 +285,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       DateTime temp = _date;
                       await showCupertinoModalPopup<void>(
                         context: context,
-                        builder: (_) => Container(
+                        builder: (modalCtx) => Container(
                           height: 280,
                           color: CupertinoColors.systemBackground.resolveFrom(context),
                           child: Column(
@@ -304,7 +304,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 child: Text(S.done),
                                 onPressed: () {
                                   setState(() => _date = temp);
-                                  Navigator.pop(context);
+                                  Navigator.pop(modalCtx);
                                 },
                               ),
                             ],

@@ -114,6 +114,9 @@ class S {
   static String get goalToGo => _t('còn thiếu', 'to go');
 
   // Delete confirmation
+  static String get deleteBudgetTitle => _t('Xoá ngân sách?', 'Delete budget?');
+  static String deleteBudgetContent(String name) =>
+      _t('Xoá ngân sách "$name" vĩnh viễn.', 'Delete "$name" budget permanently.');
   static String get deleteGoalTitle => _t('Xoá mục tiêu?', 'Delete goal?');
   static String deleteGoalContent(String name) =>
       _t('Xoá "$name" vĩnh viễn.', 'Delete "$name" permanently.');

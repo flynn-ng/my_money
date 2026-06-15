@@ -94,7 +94,7 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
                     decoration: InputDecoration(
                       hintText: S.searchTransactions,
                       hintStyle: AppTextStyles.bodyMedium
-                          .copyWith(color: AppColors.textSecondary),
+                          .copyWith(color: context.colors.textSecondary),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
@@ -262,7 +262,7 @@ class _Chip extends StatelessWidget {
             Text(
               label,
               style: AppTextStyles.labelSmall.copyWith(
-                color: selected ? Colors.white : AppColors.textPrimary,
+                color: selected ? Colors.white : context.colors.textPrimary,
                 fontWeight:
                     selected ? FontWeight.w600 : FontWeight.normal,
               ),
