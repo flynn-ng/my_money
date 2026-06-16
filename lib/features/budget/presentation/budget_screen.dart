@@ -31,7 +31,7 @@ class BudgetBody extends ConsumerWidget {
               onPressed: () => _showSetBudget(context),
               icon: const Icon(Icons.add),
               label: Text(S.setBudgetTitle),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.black),
             ),
           );
         }

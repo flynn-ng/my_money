@@ -21,7 +21,7 @@ class MoneySourcesBody extends ConsumerWidget {
     return sourcesAsync.when(
       loading: () => const Center(
           child: CircularProgressIndicator(
-              color: AppColors.amber, strokeWidth: 2)),
+              color: AppColors.black, strokeWidth: 2)),
       error: (e, _) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -96,6 +96,9 @@ class _TotalCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.surface,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: context.colors.cardShadow, blurRadius: 8, offset: Offset(0, 2))
+          ],
         ),
         child: Row(
           children: [

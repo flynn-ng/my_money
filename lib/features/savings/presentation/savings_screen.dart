@@ -31,7 +31,7 @@ class SavingsBody extends ConsumerWidget {
               onPressed: () => AddGoalScreen.show(context),
               icon: const Icon(Icons.add),
               label: Text(S.addGoal),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.black),
             ),
           );
         }

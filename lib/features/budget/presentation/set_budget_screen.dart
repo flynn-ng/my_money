@@ -137,7 +137,7 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
               children: [
                 if (widget.existing == null)
                   categoriesAsync.when(
-                    loading: () => const CircularProgressIndicator(color: AppColors.amber),
+                    loading: () => const CircularProgressIndicator(color: AppColors.black),
                     error: (e, _) => Text(friendlyError(e)),
                     data: (cats) {
                       final expenseCats = cats.where((c) => c.type != 'income').toList();
@@ -211,7 +211,7 @@ class _SetBudgetScreenState extends ConsumerState<SetBudgetScreen> {
                 FilledButton(
                   onPressed: _loading ? null : _submit,
                   style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.amber,
+                      backgroundColor: AppColors.black,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: _loading

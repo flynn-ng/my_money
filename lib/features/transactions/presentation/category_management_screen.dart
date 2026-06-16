@@ -106,7 +106,7 @@ class _CategoryManagementScreenState
             Expanded(
               child: categoriesAsync.when(
                 loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.amber)),
+                    child: CircularProgressIndicator(color: AppColors.black)),
                 error: (e, _) => Center(child: Text(friendlyError(e))),
                 data: (cats) {
                   if (cats.isEmpty) {

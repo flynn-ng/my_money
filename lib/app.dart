@@ -341,7 +341,7 @@ class _LoadingScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('🐝', style: TextStyle(fontSize: 48)),
+            Text('🐱', style: TextStyle(fontSize: 48)),
             SizedBox(height: 16),
             CircularProgressIndicator(color: AppColors.black),
           ],

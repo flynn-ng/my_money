@@ -54,7 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Gap(32),
-              const Text('🐝', style: TextStyle(fontSize: 56), textAlign: TextAlign.center),
+              const Text('🐱', style: TextStyle(fontSize: 56), textAlign: TextAlign.center),
               const Gap(12),
               Text(S.appName, style: AppTextStyles.displayLarge, textAlign: TextAlign.center),
               const Gap(4),
@@ -98,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               FilledButton(
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.amber,
+                    backgroundColor: AppColors.black,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: _loading

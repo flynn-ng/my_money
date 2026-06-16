@@ -110,7 +110,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               FilledButton(
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.amber,
+                    backgroundColor: AppColors.black,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: _loading
@@ -124,7 +124,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextButton(
                 onPressed: () => context.pop(),
                 child: Text(S.haveAccount,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.amberDark)),
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.black)),
               ),
             ],
           ),

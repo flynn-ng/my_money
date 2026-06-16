@@ -51,7 +51,7 @@ class BudgetProgressCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(budget.categoryName ?? '',
-                      style: AppTextStyles.bodyLarge),
+                      style: AppTextStyles.titleMedium),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,

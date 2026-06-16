@@ -7,7 +7,7 @@ class LoadingOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: CircularProgressIndicator(color: AppColors.amber),
+      child: CircularProgressIndicator(color: AppColors.black),
     );
   }
 }

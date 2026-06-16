@@ -106,10 +106,10 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.amberLight : Colors.white,
+                      color: isSelected ? AppColors.divider : context.colors.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? AppColors.amber : AppColors.divider,
+                        color: isSelected ? AppColors.black : AppColors.divider,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -260,7 +260,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
             FilledButton(
               onPressed: _loading ? null : _submit,
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.amber,
+                  backgroundColor: AppColors.black,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14)),
               child: _loading

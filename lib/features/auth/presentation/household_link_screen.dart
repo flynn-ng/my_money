@@ -86,18 +86,17 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                   icon: const Icon(Icons.add_home_outlined),
                   label: Text(S.createHousehold),
                   style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.amber,
+                      backgroundColor: AppColors.black,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                 ),
                 const Gap(12),
-                OutlinedButton.icon(
+                TextButton.icon(
                   onPressed: () => setState(() => _showJoinField = true),
                   icon: const Icon(Icons.group_add_outlined),
                   label: Text(S.joinWithCode),
-                  style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.amberDark,
-                      side: const BorderSide(color: AppColors.amber),
+                  style: TextButton.styleFrom(
+                      foregroundColor: AppColors.black,
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                 ),
               ] else ...[
@@ -117,7 +116,7 @@ class _HouseholdLinkScreenState extends ConsumerState<HouseholdLinkScreen> {
                 FilledButton(
                   onPressed: _loading ? null : _joinHousehold,
                   style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.amber,
+                      backgroundColor: AppColors.black,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: _loading
@@ -160,12 +159,12 @@ class _InviteCodeCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.amberLight,
+              color: AppColors.divider,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(code,
                 style: AppTextStyles.titleLarge.copyWith(
-                    letterSpacing: 4, color: AppColors.amberDark)),
+                    letterSpacing: 4, color: AppColors.blackSoft)),
           ),
           const Gap(12),
           TextButton.icon(

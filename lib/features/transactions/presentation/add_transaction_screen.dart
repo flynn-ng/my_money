@@ -428,7 +428,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               child: categoriesAsync.when(
                 loading: () => const Center(
                     child: CircularProgressIndicator(
-                        color: AppColors.amber, strokeWidth: 2)),
+                        color: AppColors.black, strokeWidth: 2)),
                 error: (e, st) => Center(child: Text(friendlyError(e))),
                 data: (cats) {
                   if (_isEditing && !_categoriesInitialized) {

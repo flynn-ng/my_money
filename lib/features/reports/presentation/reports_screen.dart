@@ -28,7 +28,7 @@ class ReportsScreen extends ConsumerWidget {
       backgroundColor: context.colors.background,
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.amber,
+          color: AppColors.black,
           onRefresh: () async {
             ref.invalidate(transactionsProvider);
             ref.invalidate(last6MonthsProvider);
