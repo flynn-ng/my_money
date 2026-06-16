@@ -35,7 +35,7 @@ class TransactionListBody extends ConsumerWidget {
         Expanded(
           child: txAsync.when(
             loading: () => const Center(
-                child: CircularProgressIndicator(color: AppColors.amber)),
+                child: CircularProgressIndicator(color: AppColors.black)),
             error: (e, _) => ErrorDisplay(
                 error: e, onRetry: () => ref.invalidate(transactionsProvider)),
             data: (transactions) {
@@ -126,7 +126,7 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
                 const Spacer(),
               Badge(
                 isLabelVisible: filter.isActive,
-                backgroundColor: AppColors.amber,
+                backgroundColor: AppColors.black,
                 smallSize: 7,
                 child: IconButton(
                   icon: Icon(
@@ -144,14 +144,14 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
                     notifier.clear();
                   },
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.amber,
+                    foregroundColor: AppColors.black,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(S.clearFilter,
                       style: AppTextStyles.labelSmall
-                          .copyWith(color: AppColors.amber)),
+                          .copyWith(color: AppColors.black)),
                 ),
             ],
           ),
@@ -277,7 +277,7 @@ class _Chip extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? AppColors.amber : context.colors.surface,
+          color: selected ? AppColors.black : context.colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -330,7 +330,7 @@ class _SummaryBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: context.colors.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(color: context.colors.cardShadow, blurRadius: 8, offset: const Offset(0, 2))
           ],
@@ -423,7 +423,7 @@ class _EmptyView extends StatelessWidget {
             onPressed: () => AddTransactionScreen.show(context),
             icon: const Icon(Icons.add),
             label: Text(S.addTransaction),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.amber),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.black),
           ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
         ],
       ),
@@ -498,7 +498,7 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
                   Text(
                     net >= 0 ? '+${net.asCurrency}' : net.asCurrency,
                     style: AppTextStyles.labelSmall.copyWith(
-                        color: net >= 0 ? AppColors.green : AppColors.red),
+                        color: net >= 0 ? AppColors.green : AppColors.textSecondary),
                   ),
                 ],
               ),

@@ -148,10 +148,10 @@ class _TransactionTileState extends State<TransactionTile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(tx.categoryName ?? S.otherCategory,
-                          style: AppTextStyles.bodyLarge),
+                          style: AppTextStyles.titleMedium),
                       if (tx.notes != null && tx.notes!.isNotEmpty)
                         Text(tx.notes!,
-                            style: AppTextStyles.labelSmall,
+                            style: AppTextStyles.bodyMedium,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                       if (tx.paidByName != null && tx.paidByName!.isNotEmpty)
@@ -178,7 +178,7 @@ class _TransactionTileState extends State<TransactionTile> {
                 Text(
                   '${isExpense ? '-' : '+'}${tx.amount.asCurrency}',
                   style: AppTextStyles.titleMedium.copyWith(
-                      color: isExpense ? AppColors.red : AppColors.green),
+                      color: isExpense ? context.colors.textPrimary : AppColors.green),
                 )
                     .animate()
                     .fadeIn(delay: 80.ms, duration: 200.ms)
