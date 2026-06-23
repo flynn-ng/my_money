@@ -17,48 +17,15 @@ import 'add_transaction_screen.dart';
 import 'widgets/transaction_tile.dart';
 
 // Body widget embedded in the Finance screen's Transactions tab
-class TransactionListBody extends ConsumerWidget {
+class TransactionListBody extends ConsumerStatefulWidget {
   const TransactionListBody({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(transactionRealtimeProvider); // keep WS subscription alive
-    final txAsync = ref.watch(filteredTransactionsProvider);
-    return Column(
-      children: [
-        txAsync.when(
-          data: (txs) => _SummaryBar(transactions: txs),
-          loading: () => const SizedBox.shrink(),
-          error: (e, _) => const SizedBox.shrink(),
-        ),
-        const _FilterBar(),
-        Expanded(
-          child: txAsync.when(
-            loading: () => const Center(
-                child: CircularProgressIndicator(color: AppColors.black)),
-            error: (e, _) => ErrorDisplay(
-                error: e, onRetry: () => ref.invalidate(transactionsProvider)),
-            data: (transactions) {
-              if (transactions.isEmpty) return const _EmptyView();
-              return _TransactionList(transactions: transactions);
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  ConsumerState<TransactionListBody> createState() =>
+      _TransactionListBodyState();
 }
 
-// ── Filter bar ────────────────────────────────────────────────────────────────
-
-class _FilterBar extends ConsumerStatefulWidget {
-  const _FilterBar();
-
-  @override
-  ConsumerState<_FilterBar> createState() => _FilterBarState();
-}
-
-class _FilterBarState extends ConsumerState<_FilterBar> {
+class _TransactionListBodyState extends ConsumerState<TransactionListBody> {
   bool _searchOpen = false;
   final _controller = TextEditingController();
 
@@ -76,8 +43,85 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
     }
   }
 
+  void _clearAll() {
+    _controller.clear();
+    setState(() => _searchOpen = false);
+    ref.read(transactionFilterProvider.notifier).clear();
+  }
+
+  // First pull reveals the search bar; second pull (search already open) refreshes data.
+  Future<void> _handlePull() async {
+    if (!_searchOpen) {
+      setState(() => _searchOpen = true);
+      await Future.delayed(const Duration(milliseconds: 150));
+    } else {
+      ref.invalidate(transactionsProvider);
+      await ref.read(transactionsProvider.future);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.watch(transactionRealtimeProvider); // keep WS subscription alive
+    final txAsync = ref.watch(filteredTransactionsProvider);
+    return Column(
+      children: [
+        txAsync.when(
+          data: (txs) => _SummaryBar(transactions: txs),
+          loading: () => const SizedBox.shrink(),
+          error: (e, _) => const SizedBox.shrink(),
+        ),
+        _FilterBar(
+          searchOpen: _searchOpen,
+          controller: _controller,
+          onToggle: _toggleSearch,
+          onClear: _clearAll,
+        ),
+        Expanded(
+          child: txAsync.when(
+            loading: () => const Center(
+                child: CircularProgressIndicator(color: AppColors.black)),
+            error: (e, _) => ErrorDisplay(
+                error: e, onRetry: () => ref.invalidate(transactionsProvider)),
+            data: (transactions) => RefreshIndicator(
+              onRefresh: _handlePull,
+              color: AppColors.black,
+              child: transactions.isEmpty
+                  ? CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: const [
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: _EmptyView(),
+                        ),
+                      ],
+                    )
+                  : _TransactionList(transactions: transactions),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
+
+class _FilterBar extends ConsumerWidget {
+  final bool searchOpen;
+  final TextEditingController controller;
+  final VoidCallback onToggle;
+  final VoidCallback onClear;
+
+  const _FilterBar({
+    required this.searchOpen,
+    required this.controller,
+    required this.onToggle,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(transactionFilterProvider);
     final notifier = ref.read(transactionFilterProvider.notifier);
     final categoriesAsync = ref.watch(categoriesProvider);
@@ -90,10 +134,10 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
           padding: EdgeInsets.fromLTRB(hPad(context), 4, hPad(context), 0),
           child: Row(
             children: [
-              if (_searchOpen)
+              if (searchOpen)
                 Expanded(
                   child: TextField(
-                    controller: _controller,
+                    controller: controller,
                     autofocus: true,
                     style: AppTextStyles.bodyMedium,
                     decoration: InputDecoration(
@@ -113,7 +157,7 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
                           ? IconButton(
                               icon: const Icon(Icons.close, size: 16),
                               onPressed: () {
-                                _controller.clear();
+                                controller.clear();
                                 notifier.setQuery('');
                               },
                             )
@@ -130,19 +174,15 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
                 smallSize: 7,
                 child: IconButton(
                   icon: Icon(
-                    _searchOpen ? Icons.search_off : Icons.search,
+                    searchOpen ? Icons.search_off : Icons.search,
                     size: 22,
                   ),
-                  onPressed: _toggleSearch,
+                  onPressed: onToggle,
                 ),
               ),
               if (filter.isActive)
                 TextButton(
-                  onPressed: () {
-                    _controller.clear();
-                    setState(() => _searchOpen = false);
-                    notifier.clear();
-                  },
+                  onPressed: onClear,
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.black,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -161,11 +201,7 @@ class _FilterBarState extends ConsumerState<_FilterBar> {
         _ChipRow(
           filter: filter,
           categoriesAsync: categoriesAsync,
-          onClearAll: () {
-            _controller.clear();
-            setState(() => _searchOpen = false);
-            notifier.clear();
-          },
+          onClearAll: onClear,
           onTypeFilter: notifier.setType,
           onCategoryFilter: notifier.setCategory,
         ),
@@ -478,6 +514,7 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 88),
       itemCount: _keys.length,
       itemBuilder: (context, i) {
