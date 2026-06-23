@@ -226,6 +226,14 @@ class _SourceCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
+                    S.sourceCurrentBalance,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: context.colors.textSecondary,
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
                     source.currentBalance.asCurrency,
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
@@ -234,14 +242,22 @@ class _SourceCard extends ConsumerWidget {
                           : AppColors.red,
                     ),
                   ),
-                  if (source.initialBalance != source.currentBalance)
-                    Text(
-                      source.initialBalance.asCompactCurrency,
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: context.colors.textSecondary,
-                        fontSize: 10,
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    S.sourceInitialBalance,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: context.colors.textSecondary,
+                      fontSize: 10,
                     ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    source.initialBalance.asCurrency,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: context.colors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ],

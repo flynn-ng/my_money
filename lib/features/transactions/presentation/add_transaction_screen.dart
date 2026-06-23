@@ -11,6 +11,7 @@ import '../../../core/constants/app_theme.dart';
 import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/error_handler.dart';
+import '../../../core/extensions/currency_ext.dart';
 import '../../../core/utils/thousands_formatter.dart';
 import '../../../core/widgets/sheet_wrapper.dart';
 import '../../auth/data/auth_repository.dart';
@@ -73,14 +74,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (!_isEditing) _amountFocus.requestFocus();
       ref.read(moneySourcesProvider.future).then((sources) {
         if (!mounted || sources.isEmpty) return;
-        setState(() {
-          if (_isEditing) {
-            final match = sources.where((s) => s.id == widget.transaction!.sourceId);
-            if (match.isNotEmpty) _selectedSource = match.first;
-          } else {
-            _selectedSource = sources.first;
-          }
-        });
+        if (_isEditing) {
+          final match = sources.where((s) => s.id == widget.transaction!.sourceId);
+          if (match.isNotEmpty) setState(() => _selectedSource = match.first);
+        }
       });
     });
   }
@@ -536,20 +533,64 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 }
 
-class _SourcePickerRow extends ConsumerWidget {
+class _SourcePickerRow extends ConsumerStatefulWidget {
   final MoneySourceModel? selected;
   final ValueChanged<MoneySourceModel?> onSelected;
 
   const _SourcePickerRow({required this.selected, required this.onSelected});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SourcePickerRow> createState() => _SourcePickerRowState();
+}
+
+class _SourcePickerRowState extends ConsumerState<_SourcePickerRow> {
+  List<MoneySourceModel>? _orderedSources;
+  List<String>? _lastSourceIds;
+
+  bool _listsEqual(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    if (oldIndex == 0) return; // "No wallet" can't be moved
+    if (newIndex == 0) newIndex = 1; // can't move before "No wallet"
+
+    final srcOld = oldIndex - 1;
+    int srcNew = newIndex - 1;
+    if (srcNew > srcOld) srcNew--;
+
+    HapticFeedback.selectionClick();
+    setState(() {
+      final item = _orderedSources!.removeAt(srcOld);
+      _orderedSources!.insert(srcNew, item);
+    });
+
+    final ids = _orderedSources!.map((s) => s.id).toList();
+    ref
+        .read(moneySourceRepositoryProvider)
+        .updateSortOrders(ids)
+        .catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final sourcesAsync = ref.watch(moneySourcesProvider);
     return sourcesAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
       data: (sources) {
         if (sources.isEmpty) return const SizedBox.shrink();
+
+        final ids = sources.map((s) => s.id).toList();
+        if (_lastSourceIds == null || !_listsEqual(_lastSourceIds!, ids)) {
+          _orderedSources = List<MoneySourceModel>.from(sources);
+          _lastSourceIds = ids;
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -562,18 +603,36 @@ class _SourcePickerRow extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 84,
-              child: ListView.separated(
+              height: 96,
+              child: ReorderableListView.builder(
                 scrollDirection: Axis.horizontal,
+                buildDefaultDragHandles: false,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                itemCount: sources.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, i) {
-                  final s = sources[i];
-                  return _SourceCard(
-                    source: s,
-                    selected: selected?.id == s.id,
-                    onTap: () => onSelected(s),
+                onReorder: _onReorder,
+                itemCount: _orderedSources!.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      key: const ValueKey('__no_source__'),
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _NoSourceCard(
+                        selected: widget.selected == null,
+                        onTap: () => widget.onSelected(null),
+                      ),
+                    );
+                  }
+                  final s = _orderedSources![index - 1];
+                  return ReorderableDragStartListener(
+                    key: ValueKey(s.id),
+                    index: index,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _SourceCard(
+                        source: s,
+                        selected: widget.selected?.id == s.id,
+                        onTap: () => widget.onSelected(s),
+                      ),
+                    ),
                   );
                 },
               ),
@@ -583,6 +642,61 @@ class _SourcePickerRow extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _NoSourceCard extends StatelessWidget {
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _NoSourceCard({required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        width: 88,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? context.colors.textSecondary.withValues(alpha: 0.1)
+              : context.colors.background,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? context.colors.textSecondary : Colors.transparent,
+            width: 1.8,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.do_not_disturb_alt_outlined,
+              size: 22,
+              color: selected
+                  ? context.colors.textPrimary
+                  : context.colors.textSecondary.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              S.noSource,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected
+                    ? context.colors.textPrimary
+                    : context.colors.textSecondary,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -598,24 +712,6 @@ class _SourceCard extends StatelessWidget {
     required this.onTap,
   });
 
-  String _compactBalance(double amount) {
-    final abs = amount.abs();
-    String formatted;
-    if (abs >= 1000000000) {
-      formatted = '${(abs / 1000000000).toStringAsFixed(1)}tỷ';
-    } else if (abs >= 1000000) {
-      final v = abs / 1000000;
-      formatted = v == v.truncateToDouble()
-          ? '${v.toStringAsFixed(0)}tr'
-          : '${v.toStringAsFixed(1)}tr';
-    } else if (abs >= 1000) {
-      formatted = '${(abs / 1000).toStringAsFixed(0)}k';
-    } else {
-      formatted = abs.toStringAsFixed(0);
-    }
-    return amount < 0 ? '-$formatted₫' : '$formatted₫';
-  }
-
   @override
   Widget build(BuildContext context) {
     final color = source.colorValue;
@@ -623,7 +719,7 @@ class _SourceCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
-        width: 88,
+        width: 100,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? color.withValues(alpha: 0.12) : context.colors.background,
@@ -637,7 +733,7 @@ class _SourceCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(source.icon, style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               source.name,
               style: TextStyle(
@@ -649,19 +745,22 @@ class _SourceCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 1),
-            Text(
-              _compactBalance(source.currentBalance),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: selected
-                    ? color.withValues(alpha: 0.8)
-                    : context.colors.textSecondary.withValues(alpha: 0.55),
+            const SizedBox(height: 3),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                source.currentBalance.asCurrency,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: selected
+                      ? color
+                      : (source.currentBalance >= 0
+                          ? AppColors.green
+                          : AppColors.red),
+                ),
+                textAlign: TextAlign.center,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
             ),
           ],
         ),

@@ -236,6 +236,7 @@ class S {
   static String get sourceInitialBalance =>
       _t('Số dư ban đầu', 'Initial balance');
   static String get sourceBalance => _t('Số dư', 'Balance');
+  static String get sourceCurrentBalance => _t('Số dư hiện tại', 'Current balance');
   static String get sourceTypeCash => _t('Tiền mặt', 'Cash');
   static String get sourceTypeBank => _t('Ngân hàng', 'Bank');
   static String get sourceTypeProperty => _t('Tài sản', 'Property');

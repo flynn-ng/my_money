@@ -93,6 +93,16 @@ class MoneySourceRepository {
   Future<void> deleteSource(String id) async {
     await _client.from(tableMoneySource).delete().eq('id', id);
   }
+
+  Future<void> updateSortOrders(List<String> orderedIds) async {
+    await Future.wait([
+      for (int i = 0; i < orderedIds.length; i++)
+        _client
+            .from(tableMoneySource)
+            .update({'sort_order': i})
+            .eq('id', orderedIds[i]),
+    ]);
+  }
 }
 
 final moneySourceRepositoryProvider = Provider<MoneySourceRepository>((ref) {
