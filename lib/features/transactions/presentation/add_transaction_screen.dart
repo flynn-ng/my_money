@@ -222,7 +222,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 children: [
                   Text(S.amount,
                       style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textSecondary)),
+                          color: context.colors.textSecondary)),
                   const SizedBox(height: 8),
                   IntrinsicWidth(
                     child: TextField(
@@ -246,7 +246,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         hintStyle: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary.withValues(alpha: 0.3),
+                          color: context.colors.textSecondary.withValues(alpha: 0.3),
                           letterSpacing: -1,
                         ),
                         suffixText: '₫',
@@ -265,21 +265,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       Icon(Icons.chevron_left,
                           size: 14,
                           color: _type == TransactionType.income
-                              ? AppColors.textSecondary.withValues(alpha: 0.4)
+                              ? context.colors.textSecondary.withValues(alpha: 0.4)
                               : Colors.transparent),
                       const SizedBox(width: 4),
                       Text(
                         _type == TransactionType.expense ? S.income : S.expense,
                         style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.textSecondary.withValues(alpha: 0.4),
+                          color: context.colors.textSecondary.withValues(alpha: 0.4),
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(Icons.chevron_right,
                           size: 14,
                           color: _type == TransactionType.expense
-                              ? AppColors.textSecondary.withValues(alpha: 0.4)
+                              ? context.colors.textSecondary.withValues(alpha: 0.4)
                               : Colors.transparent),
                     ],
                   ),
@@ -288,7 +288,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ).animate().fadeIn(delay: 60.ms).slideY(begin: -0.1),
 
             const SizedBox(height: 12),
-            Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
 
             // Category + date row
             Padding(
@@ -315,7 +315,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   decoration: BoxDecoration(
                                     border: Border(
                                         bottom: BorderSide(
-                                            color: AppColors.divider, width: 0.5)),
+                                            color: context.colors.divider, width: 0.5)),
                                   ),
                                   child: Row(
                                     children: [
@@ -383,8 +383,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 14, color: AppColors.textSecondary),
+                          Icon(Icons.calendar_today_outlined,
+                              size: 14, color: context.colors.textSecondary),
                           const SizedBox(width: 5),
                           Text(_date.shortDate,
                               style: AppTextStyles.labelSmall),
@@ -413,7 +413,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ),
             ).animate().fadeIn(delay: 100.ms),
 
-            Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
 
             // Source picker (only shown when sources exist)
             _SourcePickerRow(
@@ -429,9 +429,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             // Categories
             Expanded(
               child: categoriesAsync.when(
-                loading: () => const Center(
+                loading: () => Center(
                     child: CircularProgressIndicator(
-                        color: AppColors.black, strokeWidth: 2)),
+                        color: context.colors.textPrimary, strokeWidth: 2)),
                 error: (e, st) => Center(child: Text(friendlyError(e))),
                 data: (cats) {
                   if (_isEditing && !_categoriesInitialized) {
@@ -467,7 +467,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           decoration: BoxDecoration(
                             color: selected
                                 ? cat.colorValue.withValues(alpha: 0.15)
-                                : AppColors.cream,
+                                : context.colors.background,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: selected ? cat.colorValue : Colors.transparent,
@@ -488,7 +488,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                       : FontWeight.w500,
                                   color: selected
                                       ? cat.colorValue
-                                      : AppColors.textSecondary,
+                                      : context.colors.textSecondary,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
@@ -558,11 +558,11 @@ class _SourcePickerRow extends ConsumerWidget {
               child: Text(
                 S.selectSource,
                 style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.textSecondary),
+                    color: context.colors.textSecondary),
               ),
             ),
             SizedBox(
-              height: 72,
+              height: 84,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
@@ -579,7 +579,7 @@ class _SourcePickerRow extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
           ],
         );
       },
@@ -624,9 +624,9 @@ class _SourceCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         width: 88,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.12) : AppColors.cream,
+          color: selected ? color.withValues(alpha: 0.12) : context.colors.background,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? color : Colors.transparent,
@@ -636,14 +636,14 @@ class _SourceCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(source.icon, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 3),
+            Text(source.icon, style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 2),
             Text(
               source.name,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? color : AppColors.textSecondary,
+                color: selected ? color : context.colors.textSecondary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -657,7 +657,7 @@ class _SourceCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: selected
                     ? color.withValues(alpha: 0.8)
-                    : AppColors.textSecondary.withValues(alpha: 0.55),
+                    : context.colors.textSecondary.withValues(alpha: 0.55),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -683,15 +683,15 @@ class _QuickDateChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.cream,
+          color: context.colors.background,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: context.colors.divider),
         ),
         child: Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary)),
+                color: context.colors.textSecondary)),
       ),
     );
   }
@@ -724,7 +724,7 @@ class _Pill extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : AppColors.textSecondary,
+            color: selected ? Colors.white : context.colors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
