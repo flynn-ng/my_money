@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -11,11 +12,48 @@ import '../data/money_source_model.dart';
 import '../data/money_source_repository.dart';
 import 'add_money_source_screen.dart';
 
-class MoneySourcesBody extends ConsumerWidget {
+class MoneySourcesBody extends ConsumerStatefulWidget {
   const MoneySourcesBody({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MoneySourcesBody> createState() => _MoneySourcesBodyState();
+}
+
+class _MoneySourcesBodyState extends ConsumerState<MoneySourcesBody> {
+  List<MoneySourceModel>? _orderedSources;
+  List<String>? _lastSourceIds;
+
+  bool _listsEqual(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    if (oldIndex == 0) return; // total card is pinned
+    if (newIndex == 0) newIndex = 1;
+
+    final srcOld = oldIndex - 1;
+    int srcNew = newIndex - 1;
+    if (srcNew > srcOld) srcNew--;
+
+    HapticFeedback.selectionClick();
+    setState(() {
+      final item = _orderedSources!.removeAt(srcOld);
+      _orderedSources!.insert(srcNew, item);
+    });
+
+    final ids = _orderedSources!.map((s) => s.id).toList();
+    ref
+        .read(moneySourceRepositoryProvider)
+        .updateSortOrders(ids)
+        .catchError((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final sourcesAsync = ref.watch(moneySourcesProvider);
 
     return sourcesAsync.when(
@@ -54,29 +92,36 @@ class MoneySourcesBody extends ConsumerWidget {
           );
         }
 
-        final total =
-            sources.fold(0.0, (sum, s) => sum + s.currentBalance);
+        final ids = sources.map((s) => s.id).toList();
+        if (_lastSourceIds == null || !_listsEqual(_lastSourceIds!, ids)) {
+          _orderedSources = List<MoneySourceModel>.from(sources);
+          _lastSourceIds = ids;
+        }
 
-        return CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: _TotalCard(total: total),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, i) => _SourceCard(
-                    source: sources[i],
-                    index: i,
-                    onEdited: () => ref.invalidate(moneySourcesProvider),
-                  ),
-                  childCount: sources.length,
-                ),
-              ),
-            ),
-            const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
-          ],
+        final total =
+            _orderedSources!.fold(0.0, (sum, s) => sum + s.currentBalance);
+
+        return ReorderableListView.builder(
+          buildDefaultDragHandles: false,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          onReorder: _onReorder,
+          itemCount: _orderedSources!.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                key: const ValueKey('__total__'),
+                padding: const EdgeInsets.only(top: 16, bottom: 12),
+                child: _TotalCard(total: total),
+              );
+            }
+            final s = _orderedSources![index - 1];
+            return _SourceCard(
+              key: ValueKey(s.id),
+              source: s,
+              dragIndex: index,
+              onEdited: () => ref.invalidate(moneySourcesProvider),
+            );
+          },
         );
       },
     );
@@ -131,12 +176,13 @@ class _TotalCard extends StatelessWidget {
 
 class _SourceCard extends ConsumerWidget {
   final MoneySourceModel source;
-  final int index;
+  final int dragIndex;
   final VoidCallback onEdited;
 
   const _SourceCard({
+    super.key,
     required this.source,
-    required this.index,
+    required this.dragIndex,
     required this.onEdited,
   });
 
@@ -162,9 +208,8 @@ class _SourceCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
-        onLongPress: () =>
-            AddMoneySourceScreen.show(context, source: source)
-                .then((_) => onEdited()),
+        onTap: () => AddMoneySourceScreen.show(context, source: source)
+            .then((_) => onEdited()),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -260,11 +305,19 @@ class _SourceCard extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(width: 8),
+              // Drag handle
+              ReorderableDragStartListener(
+                index: dragIndex,
+                child: Icon(
+                  Icons.drag_handle,
+                  size: 20,
+                  color: context.colors.textSecondary.withValues(alpha: 0.35),
+                ),
+              ),
             ],
           ),
-        ).animate(delay: (index * 60).ms)
-            .fadeIn(duration: 250.ms)
-            .slideX(begin: 0.04),
+        ),
       ),
     );
   }
