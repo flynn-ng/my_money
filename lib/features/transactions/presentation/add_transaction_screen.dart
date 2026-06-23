@@ -683,15 +683,16 @@ class _QuickDateChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: context.colors.background,
+          color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: context.colors.divider),
+          border: Border.all(
+              color: CupertinoColors.separator.resolveFrom(context), width: 0.5),
         ),
         child: Text(label,
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: context.colors.textSecondary)),
+                color: CupertinoColors.secondaryLabel.resolveFrom(context))),
       ),
     );
   }
