@@ -71,12 +71,13 @@ class _TransactionListBodyState extends ConsumerState<TransactionListBody> {
           loading: () => const SizedBox.shrink(),
           error: (e, _) => const SizedBox.shrink(),
         ),
-        _FilterBar(
-          searchOpen: _searchOpen,
-          controller: _controller,
-          onToggle: _toggleSearch,
-          onClear: _clearAll,
-        ),
+        if (_searchOpen)
+          _FilterBar(
+            searchOpen: _searchOpen,
+            controller: _controller,
+            onToggle: _toggleSearch,
+            onClear: _clearAll,
+          ),
         Expanded(
           child: txAsync.when(
             loading: () => const Center(
