@@ -305,7 +305,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           final today = DateTime.now();
                           final yesterday = today.subtract(const Duration(days: 1));
                           return Container(
-                            color: CupertinoColors.systemBackground.resolveFrom(context),
+                            color: context.colors.background,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -683,16 +683,15 @@ class _QuickDateChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context), width: 0.5),
+          border: Border.all(color: context.colors.divider, width: 0.5),
         ),
         child: Text(label,
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context))),
+                color: context.colors.textPrimary)),
       ),
     );
   }
