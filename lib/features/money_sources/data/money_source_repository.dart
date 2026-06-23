@@ -17,39 +17,7 @@ class MoneySourceRepository {
         .eq('is_archived', false)
         .order('sort_order');
 
-    if (sources.isEmpty) return [];
-
-    // Fetch all transaction amounts to compute current balances.
-    // Transactions without a source_id (created before wallets existed) fall
-    // back to the first wallet (lowest sort_order) so their amounts are not lost.
-    final defaultSourceId = sources.isNotEmpty ? sources.first['id'] as String : null;
-
-    final txData = await _client
-        .from(tableTransactions)
-        .select('source_id, type, amount')
-        .eq('household_id', householdId);
-
-    final income = <String, double>{};
-    final expense = <String, double>{};
-    for (final row in txData) {
-      final sid = (row['source_id'] as String?) ?? defaultSourceId;
-      if (sid == null) continue;
-      final amt = (row['amount'] as num).toDouble();
-      if (row['type'] == 'income') {
-        income[sid] = (income[sid] ?? 0) + amt;
-      } else {
-        expense[sid] = (expense[sid] ?? 0) + amt;
-      }
-    }
-
-    return sources.map((json) {
-      final id = json['id'] as String;
-      return MoneySourceModel.fromJson(
-        json,
-        income: income[id] ?? 0,
-        expense: expense[id] ?? 0,
-      );
-    }).toList();
+    return sources.map((json) => MoneySourceModel.fromJson(json)).toList();
   }
 
   Future<MoneySourceModel> createSource({
