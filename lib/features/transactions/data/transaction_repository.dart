@@ -17,7 +17,7 @@ class TransactionRepository {
     final toStr = DateTime(to.year, to.month + 1, 0).toIso8601String().substring(0, 10);
     final data = await _client
         .from(tableTransactions)
-        .select('*, categories(*), profiles(display_name), money_sources(name,icon,color)')
+        .select('*, categories(*), profiles(display_name)')
         .eq('household_id', householdId)
         .gte('date', fromStr)
         .lte('date', toStr)
@@ -31,7 +31,7 @@ class TransactionRepository {
     final to = DateTime(month.year, month.month + 1, 0).toIso8601String().substring(0, 10);
     final data = await _client
         .from(tableTransactions)
-        .select('*, categories(*), profiles(display_name), money_sources(name,icon,color)')
+        .select('*, categories(*), profiles(display_name)')
         .eq('household_id', householdId)
         .gte('date', from)
         .lte('date', to)
