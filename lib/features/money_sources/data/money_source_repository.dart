@@ -19,17 +19,21 @@ class MoneySourceRepository {
 
     if (sources.isEmpty) return [];
 
-    // Fetch all source-linked transaction amounts to compute current balances
+    // Fetch all transaction amounts to compute current balances.
+    // Transactions without a source_id (created before wallets existed) fall
+    // back to the first wallet (lowest sort_order) so their amounts are not lost.
+    final defaultSourceId = sources.isNotEmpty ? sources.first['id'] as String : null;
+
     final txData = await _client
         .from(tableTransactions)
         .select('source_id, type, amount')
-        .eq('household_id', householdId)
-        .not('source_id', 'is', null);
+        .eq('household_id', householdId);
 
     final income = <String, double>{};
     final expense = <String, double>{};
     for (final row in txData) {
-      final sid = row['source_id'] as String;
+      final sid = (row['source_id'] as String?) ?? defaultSourceId;
+      if (sid == null) continue;
       final amt = (row['amount'] as num).toDouble();
       if (row['type'] == 'income') {
         income[sid] = (income[sid] ?? 0) + amt;

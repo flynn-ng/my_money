@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/supabase_constants.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../money_sources/data/money_source_repository.dart';
 import 'category_model.dart';
 import 'transaction_model.dart';
 
@@ -158,7 +159,10 @@ final transactionRealtimeProvider = Provider.autoDispose<void>((ref) {
           column: 'household_id',
           value: householdId,
         ),
-        callback: (_) => ref.invalidate(transactionsProvider),
+        callback: (_) {
+          ref.invalidate(transactionsProvider);
+          ref.invalidate(moneySourcesProvider);
+        },
       )
       .subscribe();
 

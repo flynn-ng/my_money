@@ -256,6 +256,14 @@ class S {
   static String get filterAll => _t('Tất cả', 'All');
   static String get clearFilter => _t('Xoá', 'Clear');
 
+  // Push notifications
+  static String get pushNotifications =>
+      _t('Thông báo đẩy', 'Push Notifications');
+  static String get pushPermissionDenied => _t(
+        'Vui lòng bật thông báo trong cài đặt trình duyệt.',
+        'Please enable notifications in your browser settings.',
+      );
+
   // Common
   static String get retry => _t('Thử lại', 'Retry');
   static String get cancel => _t('Huỷ', 'Cancel');

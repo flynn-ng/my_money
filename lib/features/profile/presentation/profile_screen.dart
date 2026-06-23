@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,7 @@ import '../../../core/utils/responsive.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/profile_model.dart';
 import '../../household/presentation/widgets/household_switcher_sheet.dart';
+import '../../notifications/push_subscription_service.dart';
 import 'widgets/avatar_picker_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -280,6 +282,10 @@ class _SettingsTab extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 16),
+        if (kIsWeb) ...[
+          _Card(children: [const _NotificationToggleRow()]),
+          const SizedBox(height: 16),
+        ],
         _Card(
           children: [
             _Row(
@@ -472,5 +478,85 @@ class _Divider extends StatelessWidget {
       padding: EdgeInsets.only(left: 46),
       child: Divider(height: 1),
     );
+  }
+}
+
+class _NotificationToggleRow extends ConsumerStatefulWidget {
+  const _NotificationToggleRow();
+
+  @override
+  ConsumerState<_NotificationToggleRow> createState() =>
+      _NotificationToggleRowState();
+}
+
+class _NotificationToggleRowState
+    extends ConsumerState<_NotificationToggleRow> {
+  bool _loading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final service = ref.read(pushSubscriptionServiceProvider);
+    if (!service.isSupported) return const SizedBox.shrink();
+
+    final subscribedAsync = ref.watch(pushSubscribedProvider);
+    final profileAsync = ref.watch(currentProfileProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(Icons.notifications_outlined,
+              size: 18, color: AppColors.textSecondary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(S.pushNotifications, style: AppTextStyles.bodyMedium),
+          ),
+          subscribedAsync.when(
+            loading: () => const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2)),
+            error: (_, _) => const SizedBox.shrink(),
+            data: (isSubscribed) => _loading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : Switch(
+                    value: isSubscribed,
+                    activeThumbColor: AppColors.black,
+                    onChanged: profileAsync.value?.householdId == null
+                        ? null
+                        : (val) => _toggle(val, profileAsync.value!),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _toggle(bool enable, ProfileModel profile) async {
+    if (_loading) return;
+    setState(() => _loading = true);
+
+    final service = ref.read(pushSubscriptionServiceProvider);
+    if (enable) {
+      final ok = await service.subscribe(
+        profileId: profile.id,
+        householdId: profile.householdId!,
+      );
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.pushPermissionDenied)),
+        );
+      }
+    } else {
+      await service.unsubscribe(profileId: profile.id);
+    }
+
+    if (mounted) {
+      setState(() => _loading = false);
+      ref.invalidate(pushSubscribedProvider);
+    }
   }
 }
