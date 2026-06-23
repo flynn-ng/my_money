@@ -36,8 +36,7 @@ class _MoneySourcesBodyState extends ConsumerState<MoneySourcesBody> {
     if (newIndex == 0) newIndex = 1;
 
     final srcOld = oldIndex - 1;
-    int srcNew = newIndex - 1;
-    if (srcNew > srcOld) srcNew--;
+    final srcNew = newIndex - 1;
 
     HapticFeedback.selectionClick();
     setState(() {
@@ -104,7 +103,7 @@ class _MoneySourcesBodyState extends ConsumerState<MoneySourcesBody> {
         return ReorderableListView.builder(
           buildDefaultDragHandles: false,
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-          onReorder: _onReorder,
+          onReorderItem: _onReorder,
           itemCount: _orderedSources!.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {

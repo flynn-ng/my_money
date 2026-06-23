@@ -560,8 +560,7 @@ class _SourcePickerRowState extends ConsumerState<_SourcePickerRow> {
     if (newIndex == 0) newIndex = 1; // can't move before "No wallet"
 
     final srcOld = oldIndex - 1;
-    int srcNew = newIndex - 1;
-    if (srcNew > srcOld) srcNew--;
+    final srcNew = newIndex - 1;
 
     HapticFeedback.selectionClick();
     setState(() {
@@ -608,7 +607,7 @@ class _SourcePickerRowState extends ConsumerState<_SourcePickerRow> {
                 scrollDirection: Axis.horizontal,
                 buildDefaultDragHandles: false,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                onReorder: _onReorder,
+                onReorderItem: _onReorder,
                 itemCount: _orderedSources!.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
