@@ -1,6 +1,6 @@
 -- Push subscriptions for PWA Web Push notifications
 
-CREATE EXTENSION IF NOT EXISTS pg_net SCHEMA net;
+CREATE EXTENSION IF NOT EXISTS pg_net;
 
 CREATE TABLE public.push_subscriptions (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
