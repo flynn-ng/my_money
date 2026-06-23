@@ -129,12 +129,12 @@ class _FilterBar extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search row
-        Padding(
-          padding: EdgeInsets.fromLTRB(hPad(context), 4, hPad(context), 0),
-          child: Row(
-            children: [
-              if (searchOpen)
+        // Search row — only rendered when search is open
+        if (searchOpen)
+          Padding(
+            padding: EdgeInsets.fromLTRB(hPad(context), 4, hPad(context), 0),
+            child: Row(
+              children: [
                 Expanded(
                   child: TextField(
                     controller: controller,
@@ -165,37 +165,27 @@ class _FilterBar extends ConsumerWidget {
                     ),
                     onChanged: notifier.setQuery,
                   ),
-                )
-              else
-                const Spacer(),
-              Badge(
-                isLabelVisible: filter.isActive,
-                backgroundColor: AppColors.black,
-                smallSize: 7,
-                child: IconButton(
-                  icon: Icon(
-                    searchOpen ? Icons.search_off : Icons.search,
-                    size: 22,
-                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search_off, size: 22),
                   onPressed: onToggle,
                 ),
-              ),
-              if (filter.isActive)
-                TextButton(
-                  onPressed: onClear,
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                if (filter.isActive)
+                  TextButton(
+                    onPressed: onClear,
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(S.clearFilter,
+                        style: AppTextStyles.labelSmall
+                            .copyWith(color: AppColors.black)),
                   ),
-                  child: Text(S.clearFilter,
-                      style: AppTextStyles.labelSmall
-                          .copyWith(color: AppColors.black)),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
 
         // Chip row
         _ChipRow(
