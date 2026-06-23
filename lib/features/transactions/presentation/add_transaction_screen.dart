@@ -418,7 +418,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             // Source picker (only shown when sources exist)
             _SourcePickerRow(
               selected: _selectedSource,
-              onSelected: (s) => setState(() => _selectedSource = s),
+              onSelected: (s) {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedSource = s);
+              },
             ),
 
             const SizedBox(height: 4),
@@ -547,71 +550,118 @@ class _SourcePickerRow extends ConsumerWidget {
       error: (_, _) => const SizedBox.shrink(),
       data: (sources) {
         if (sources.isEmpty) return const SizedBox.shrink();
-        return SizedBox(
-          height: 42,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            children: sources.map((s) => Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: _SourceChip(
-                    label: s.name,
-                    icon: s.icon,
-                    color: s.colorValue,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+              child: Text(
+                S.selectSource,
+                style: AppTextStyles.labelSmall.copyWith(
+                    color: AppColors.textSecondary),
+              ),
+            ),
+            SizedBox(
+              height: 72,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                itemCount: sources.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (context, i) {
+                  final s = sources[i];
+                  return _SourceCard(
+                    source: s,
                     selected: selected?.id == s.id,
                     onTap: () => onSelected(s),
-                  ),
-                )).toList(),
-          ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Divider(height: 1, color: AppColors.divider),
+          ],
         );
       },
     );
   }
 }
 
-class _SourceChip extends StatelessWidget {
-  final String label;
-  final String icon;
-  final Color color;
+class _SourceCard extends StatelessWidget {
+  final MoneySourceModel source;
   final bool selected;
   final VoidCallback onTap;
 
-  const _SourceChip({
-    required this.label,
-    required this.icon,
-    required this.color,
+  const _SourceCard({
+    required this.source,
     required this.selected,
     required this.onTap,
   });
 
+  String _compactBalance(double amount) {
+    final abs = amount.abs();
+    String formatted;
+    if (abs >= 1000000000) {
+      formatted = '${(abs / 1000000000).toStringAsFixed(1)}tỷ';
+    } else if (abs >= 1000000) {
+      final v = abs / 1000000;
+      formatted = v == v.truncateToDouble()
+          ? '${v.toStringAsFixed(0)}tr'
+          : '${v.toStringAsFixed(1)}tr';
+    } else if (abs >= 1000) {
+      formatted = '${(abs / 1000).toStringAsFixed(0)}k';
+    } else {
+      formatted = abs.toStringAsFixed(0);
+    }
+    return amount < 0 ? '-$formatted₫' : '$formatted₫';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final color = source.colorValue;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        duration: const Duration(milliseconds: 160),
+        width: 88,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          color: selected ? color.withValues(alpha: 0.12) : AppColors.cream,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? color : AppColors.divider,
-            width: 1.2,
+            color: selected ? color : Colors.transparent,
+            width: 1.8,
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(icon, style: const TextStyle(fontSize: 13)),
-            const SizedBox(width: 4),
+            Text(source.icon, style: const TextStyle(fontSize: 22)),
+            const SizedBox(height: 3),
             Text(
-              label,
+              source.name,
               style: TextStyle(
-                fontSize: 12,
-                fontWeight:
-                    selected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: selected ? color : AppColors.textSecondary,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 1),
+            Text(
+              _compactBalance(source.currentBalance),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: selected
+                    ? color.withValues(alpha: 0.8)
+                    : AppColors.textSecondary.withValues(alpha: 0.55),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
