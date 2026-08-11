@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/supabase_constants.dart';
+import '../../../core/offline/offline_cache.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../auth/data/auth_repository.dart';
 import 'category_model.dart';
@@ -10,7 +11,10 @@ class TransactionRepository {
   final SupabaseClient _client;
   TransactionRepository(this._client);
 
-  Future<List<TransactionModel>> getTransactionsForDateRange(
+  // The `*Rows` variants return the raw server rows so callers can hand them to
+  // the offline cache before parsing; the model variants just wrap them.
+
+  Future<List<Map<String, dynamic>>> getTransactionRowsForDateRange(
       String householdId, DateTime from, DateTime to) async {
     final fromStr = '${from.year}-${from.month.toString().padLeft(2, '0')}-01';
     final toStr = DateTime(to.year, to.month + 1, 0).toIso8601String().substring(0, 10);
@@ -21,10 +25,16 @@ class TransactionRepository {
         .gte('date', fromStr)
         .lte('date', toStr)
         .order('date', ascending: false);
-    return data.map((r) => TransactionModel.fromJson(r)).toList();
+    return List<Map<String, dynamic>>.from(data);
   }
 
-  Future<List<TransactionModel>> getTransactionsForMonth(
+  Future<List<TransactionModel>> getTransactionsForDateRange(
+      String householdId, DateTime from, DateTime to) async {
+    final rows = await getTransactionRowsForDateRange(householdId, from, to);
+    return rows.map(TransactionModel.fromJson).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactionRowsForMonth(
       String householdId, DateTime month) async {
     final from = DateTime(month.year, month.month, 1).toIso8601String().substring(0, 10);
     final to = DateTime(month.year, month.month + 1, 0).toIso8601String().substring(0, 10);
@@ -35,7 +45,13 @@ class TransactionRepository {
         .gte('date', from)
         .lte('date', to)
         .order('date', ascending: false);
-    return data.map((r) => TransactionModel.fromJson(r)).toList();
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  Future<List<TransactionModel>> getTransactionsForMonth(
+      String householdId, DateTime month) async {
+    final rows = await getTransactionRowsForMonth(householdId, month);
+    return rows.map(TransactionModel.fromJson).toList();
   }
 
   Future<void> addTransaction(TransactionModel tx) async {
@@ -50,13 +66,18 @@ class TransactionRepository {
     await _client.from(tableTransactions).delete().eq('id', id);
   }
 
-  Future<List<CategoryModel>> getCategories(String householdId) async {
+  Future<List<Map<String, dynamic>>> getCategoryRows(String householdId) async {
     final data = await _client
         .from(tableCategories)
         .select()
         .eq('household_id', householdId)
         .order('sort_order');
-    return data.map((r) => CategoryModel.fromJson(r)).toList();
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  Future<List<CategoryModel>> getCategories(String householdId) async {
+    final rows = await getCategoryRows(householdId);
+    return rows.map(CategoryModel.fromJson).toList();
   }
 
   Future<CategoryModel> createCategory({
@@ -105,9 +126,14 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
 final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) async {
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) return [];
-  return ref
-      .watch(transactionRepositoryProvider)
-      .getCategories(profile!.householdId!);
+  final householdId = profile!.householdId!;
+  final repo = ref.watch(transactionRepositoryProvider);
+  return fetchWithCache(
+    ref: ref,
+    key: 'categories_$householdId',
+    fetch: () => repo.getCategoryRows(householdId),
+    parse: CategoryModel.fromJson,
+  );
 });
 
 class SelectedMonthNotifier extends Notifier<DateTime> {
@@ -129,10 +155,15 @@ final transactionsProvider =
     FutureProvider<List<TransactionModel>>((ref) async {
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) return [];
+  final householdId = profile!.householdId!;
   final month = ref.watch(selectedMonthProvider);
-  return ref
-      .watch(transactionRepositoryProvider)
-      .getTransactionsForMonth(profile!.householdId!, month);
+  final repo = ref.watch(transactionRepositoryProvider);
+  return fetchWithCache(
+    ref: ref,
+    key: 'tx_${householdId}_${month.year}-${month.month}',
+    fetch: () => repo.getTransactionRowsForMonth(householdId, month),
+    parse: TransactionModel.fromJson,
+  );
 });
 
 // ── Realtime subscription ─────────────────────────────────────────────────────

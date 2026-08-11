@@ -63,6 +63,15 @@ VALUES ('<auth.users.id>', '<name>') ON CONFLICT (id) DO NOTHING;
 ## Platform
 iOS + Web only (no Android). Uses Nix flake — always run flutter via `nix develop --command flutter ...`.
 
+## Offline
+`lib/core/offline/` — list reads fall back to the last server response when the network is unreachable:
+- `offline_cache.dart` — `fetchWithCache()` wraps a fetch, stores the **raw rows** in `shared_preferences` (raw, so embedded joins survive), and replays them on failure. Only transport failures fall back; anything the server answered (`PostgrestException`, auth) is rethrown so real bugs stay visible. Cleared on sign-out
+- `connectivity_provider.dart` — `isOnlineProvider`. Browser online/offline events on web; on iOS the flag is driven by the data layer reporting transport failures/successes
+- Repositories expose `*Rows` variants returning raw rows next to the model methods; the co-located providers call `fetchWithCache`
+- `OfflineBanner` in `_AppShell` marks the session as showing saved data
+
+Writes still require a connection — there is no queue, so an offline save surfaces the usual network error.
+
 ## PWA (web build)
 The web app is installable and boots offline. Everything lives in `web/`:
 - `manifest.json` — name/icons/shortcuts; `display: standalone`, scope `/`

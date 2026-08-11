@@ -40,6 +40,9 @@ dependencies:
   uuid: ^4.4.0
   share_plus: ^10.0.0
 
+  # Offline cache (already pulled in transitively by supabase_flutter)
+  shared_preferences: ^2.5.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

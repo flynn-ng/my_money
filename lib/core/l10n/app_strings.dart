@@ -344,6 +344,11 @@ class S {
             'Click "Install". The app opens in its own window.'),
       ];
 
+  // Offline
+  static String get offlineTitle => _t('Đang ngoại tuyến', 'Offline');
+  static String get offlineHint =>
+      _t('đang xem dữ liệu đã lưu', 'showing saved data');
+
   // Common
   static String get retry => _t('Thử lại', 'Retry');
   static String get cancel => _t('Huỷ', 'Cancel');

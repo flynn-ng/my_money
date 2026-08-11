@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/supabase_constants.dart';
+import '../../../core/offline/offline_cache.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../auth/data/auth_repository.dart';
 import 'money_source_model.dart';
@@ -9,7 +10,7 @@ class MoneySourceRepository {
   final SupabaseClient _client;
   MoneySourceRepository(this._client);
 
-  Future<List<MoneySourceModel>> getSources(String householdId) async {
+  Future<List<Map<String, dynamic>>> getSourceRows(String householdId) async {
     final sources = await _client
         .from(tableMoneySource)
         .select()
@@ -17,7 +18,12 @@ class MoneySourceRepository {
         .eq('is_archived', false)
         .order('sort_order');
 
-    return sources.map((json) => MoneySourceModel.fromJson(json)).toList();
+    return List<Map<String, dynamic>>.from(sources);
+  }
+
+  Future<List<MoneySourceModel>> getSources(String householdId) async {
+    final rows = await getSourceRows(householdId);
+    return rows.map(MoneySourceModel.fromJson).toList();
   }
 
   Future<MoneySourceModel> createSource({
@@ -80,7 +86,12 @@ final moneySourceRepositoryProvider = Provider<MoneySourceRepository>((ref) {
 final moneySourcesProvider = FutureProvider<List<MoneySourceModel>>((ref) async {
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) return [];
-  return ref
-      .watch(moneySourceRepositoryProvider)
-      .getSources(profile!.householdId!);
+  final householdId = profile!.householdId!;
+  final repo = ref.watch(moneySourceRepositoryProvider);
+  return fetchWithCache(
+    ref: ref,
+    key: 'sources_$householdId',
+    fetch: () => repo.getSourceRows(householdId),
+    parse: MoneySourceModel.fromJson,
+  );
 });

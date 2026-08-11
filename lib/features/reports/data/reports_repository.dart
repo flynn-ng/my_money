@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/offline/offline_cache.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../transactions/data/transaction_model.dart';
 import '../../transactions/data/transaction_repository.dart';
@@ -91,10 +92,16 @@ final last6MonthsProvider = FutureProvider<List<MonthlyTotal>>((ref) async {
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) return [];
   final repo = ref.watch(transactionRepositoryProvider);
+  final householdId = profile!.householdId!;
   final now = DateTime.now();
   final from = DateTime(now.year, now.month - 5, 1);
   final to = DateTime(now.year, now.month, 1);
-  final allTxs = await repo.getTransactionsForDateRange(profile!.householdId!, from, to);
+  final allTxs = await fetchWithCache(
+    ref: ref,
+    key: 'tx_range_${householdId}_${from.year}-${from.month}_${to.year}-${to.month}',
+    fetch: () => repo.getTransactionRowsForDateRange(householdId, from, to),
+    parse: TransactionModel.fromJson,
+  );
 
   // Group by year-month
   final byMonth = <String, (double, double)>{};
