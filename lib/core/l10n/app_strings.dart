@@ -98,6 +98,23 @@ class S {
   static String get totalExpense => _t('Chi tiêu', 'Expense');
   static String get netSaved => _t('Còn lại', 'Remaining');
 
+  // CSV export
+  static String get exportCsv => _t('Xuất CSV', 'Export CSV');
+  static String get exportNoData =>
+      _t('Không có giao dịch để xuất', 'No transactions to export');
+  static String get exportDone =>
+      _t('Đã tải file CSV', 'CSV file downloaded');
+  static String get exportFailed =>
+      _t('Xuất file thất bại', 'Export failed');
+  static String exportShareSubject(String monthYear) =>
+      _t('Giao dịch $monthYear', 'Transactions $monthYear');
+  static String get csvDate => _t('Ngày', 'Date');
+  static String get csvType => _t('Loại', 'Type');
+  static String get csvCategory => _t('Danh mục', 'Category');
+  static String get csvAmount => _t('Số tiền', 'Amount');
+  static String get csvNotes => _t('Ghi chú', 'Notes');
+  static String get csvPaidBy => _t('Người chi', 'Paid by');
+
   // Budget card
   static String get budgetOf => _t('của', 'of');
   static String get budgetPercentUsed => _t('% đã dùng', '% used');

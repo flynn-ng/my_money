@@ -11,6 +11,7 @@ import '../../../core/widgets/loading_overlay.dart';
 import '../../transactions/data/transaction_repository.dart';
 import '../data/reports_repository.dart';
 import 'widgets/category_pie_chart.dart';
+import 'widgets/export_csv_button.dart';
 import 'widgets/monthly_bar_chart.dart';
 import 'widgets/monthly_summary_card.dart';
 
@@ -49,6 +50,7 @@ class ReportsScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
+                      const ExportCsvButton(),
                       IconButton(
                         icon: const Icon(Icons.chevron_left),
                         onPressed: () =>

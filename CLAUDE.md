@@ -69,7 +69,7 @@ iOS + Web only (no Android). Uses Nix flake — always run flutter via `nix deve
 ## Improvement ideas (backlog)
 - Push notifications when partner adds a transaction
 - Monthly summary widget (total income vs expense card at top of transaction list)
-- Export to CSV / Google Sheets
+- Google Sheets sync (monthly CSV export already ships on the Reports screen)
 - Recurring transactions (auto-log monthly bills)
 - Dark mode
 - Widget for iOS home screen showing monthly balance
