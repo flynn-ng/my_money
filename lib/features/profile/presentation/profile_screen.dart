@@ -15,6 +15,7 @@ import '../../auth/domain/profile_model.dart';
 import '../../household/presentation/widgets/household_switcher_sheet.dart';
 import '../../notifications/push_subscription_service.dart';
 import '../../pwa/presentation/install_guide_sheet.dart';
+import '../../pwa/pwa_install_service.dart';
 import 'widgets/avatar_picker_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -284,17 +285,20 @@ class _SettingsTab extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         if (kIsWeb) ...[
-          _Card(
-            children: [
-              _Row(
-                icon: Icons.add_to_home_screen,
-                label: S.installGuideRow,
-                value: '',
-                onTap: () => InstallGuideSheet.show(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+          // Nothing to install when the app is already running standalone.
+          if (!ref.read(pwaInstallServiceProvider).isInstalled) ...[
+            _Card(
+              children: [
+                _Row(
+                  icon: Icons.add_to_home_screen,
+                  label: S.installGuideRow,
+                  value: '',
+                  onTap: () => InstallGuideSheet.show(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
           _Card(children: [const _NotificationToggleRow()]),
           const SizedBox(height: 16),
         ],

@@ -1,0 +1,19 @@
+# Cloudflare Pages headers (copied verbatim into build/web by `flutter build web`).
+# The service worker and the files it bootstraps from must never be served
+# stale, or a deploy cannot reach clients that already have the app installed.
+
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+/index.html
+  Cache-Control: no-cache
+
+/flutter_bootstrap.js
+  Cache-Control: no-cache
+
+/manifest.json
+  Cache-Control: no-cache
+
+/icons/*
+  Cache-Control: public, max-age=604800

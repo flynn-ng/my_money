@@ -293,6 +293,11 @@ class S {
       );
   static String get installGuideYourDevice =>
       _t('Thiết bị của bạn', 'Your device');
+  static String get installNow => _t('Cài đặt ngay', 'Install now');
+  static String get installOrManually =>
+      _t('HOẶC LÀM THỦ CÔNG', 'OR DO IT MANUALLY');
+  static String get installAppDone =>
+      _t('Đã cài đặt ứng dụng', 'App installed');
   static String get installGuideFooter => _t(
         'Sau khi cài, mở app từ màn hình chính rồi vào Cài đặt để bật thông báo.',
         'After installing, open the app from your home screen, then turn on '

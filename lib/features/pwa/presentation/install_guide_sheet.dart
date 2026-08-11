@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
@@ -7,13 +8,16 @@ import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/sheet_wrapper.dart';
+import '../pwa_install_service.dart';
 
 /// Step-by-step "add to home screen" instructions.
 ///
-/// The card matching the visitor's platform is listed first and badged — on the
-/// web build `defaultTargetPlatform` follows the browser, so an iPhone opens
-/// straight onto the Safari steps.
-class InstallGuideSheet extends StatelessWidget {
+/// Chromium hands us a real install prompt, which appears as a button at the
+/// top. Everyone else follows the written steps: the card matching the
+/// visitor's platform is listed first and badged — on the web build
+/// `defaultTargetPlatform` follows the browser, so an iPhone opens straight
+/// onto the Safari steps.
+class InstallGuideSheet extends ConsumerStatefulWidget {
   const InstallGuideSheet({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -25,8 +29,31 @@ class InstallGuideSheet extends StatelessWidget {
   }
 
   @override
+  ConsumerState<InstallGuideSheet> createState() => _InstallGuideSheetState();
+}
+
+class _InstallGuideSheetState extends ConsumerState<InstallGuideSheet> {
+  bool _prompting = false;
+
+  Future<void> _install() async {
+    setState(() => _prompting = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final result = await ref.read(pwaInstallServiceProvider).prompt();
+    if (!mounted) return;
+    setState(() => _prompting = false);
+
+    if (result == InstallPromptResult.accepted) {
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(content: Text(S.installAppDone)));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final platform = defaultTargetPlatform;
+    final canPrompt = ref.read(pwaInstallServiceProvider).canPrompt;
 
     final ios = _Platform(
       icon: Icons.phone_iphone,
@@ -62,6 +89,22 @@ class InstallGuideSheet extends StatelessWidget {
         const SizedBox(height: 6),
         Text(S.installGuideSubtitle, style: AppTextStyles.bodyMedium),
         const SizedBox(height: 20),
+        if (canPrompt) ...[
+          FilledButton.icon(
+            onPressed: _prompting ? null : _install,
+            icon: const Icon(Icons.add_to_home_screen, size: 18),
+            label: Text(S.installNow),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.black,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(S.installOrManually,
+              textAlign: TextAlign.center, style: AppTextStyles.labelSmall),
+          const SizedBox(height: 12),
+        ],
         for (final p in platforms) ...[
           _PlatformCard(platform: p),
           const SizedBox(height: 12),

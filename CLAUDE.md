@@ -63,6 +63,16 @@ VALUES ('<auth.users.id>', '<name>') ON CONFLICT (id) DO NOTHING;
 ## Platform
 iOS + Web only (no Android). Uses Nix flake — always run flutter via `nix develop --command flutter ...`.
 
+## PWA (web build)
+The web app is installable and boots offline. Everything lives in `web/`:
+- `manifest.json` — name/icons/shortcuts; `display: standalone`, scope `/`
+- `sw.js` — our own service worker (Flutter's generated one is never registered). Offline app shell + web push in one file. Same-origin GETs are network-first with a cache fallback so a deploy can't leave `main.dart.js` skewed against the shell; icons are cache-first; cross-origin (Supabase) requests pass straight through. **Bump `SW_VERSION` when the caching rules change** — `activate` drops every cache that doesn't match
+- `pwa_helper.js` — stashes `beforeinstallprompt` and reports standalone/iOS; read from Dart via `lib/features/pwa/`
+- `flutter_bootstrap.js` — registers `/sw.js`, then removes the boot splash from `index.html` after `runApp()`
+- `_headers` — Cloudflare Pages cache rules; `sw.js` / `index.html` / `flutter_bootstrap.js` must stay `no-cache`
+
+Settings → "Cài app vào máy" opens `InstallGuideSheet`: a native install button on Chromium, written per-platform steps everywhere else (iOS Safari has no prompt API). The row hides itself once the app runs standalone.
+
 ## Nix codesign fix
 `ios/nix_shims/codesign` and `ios/nix_shims/rsync` are PATH shims that fix Flutter.framework permission errors from the Nix store. Do not remove them.
 
