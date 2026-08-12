@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/supabase_constants.dart';
+import '../../../core/offline/offline_cache.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../auth/data/auth_repository.dart';
 import 'savings_model.dart';
@@ -9,13 +10,18 @@ class SavingsRepository {
   final SupabaseClient _client;
   SavingsRepository(this._client);
 
-  Future<List<SavingsGoalModel>> getGoals(String householdId) async {
+  Future<List<Map<String, dynamic>>> getGoalRows(String householdId) async {
     final data = await _client
         .from(tableSavingsGoals)
         .select()
         .eq('household_id', householdId)
         .order('created_at', ascending: false);
-    return data.map((r) => SavingsGoalModel.fromJson(r)).toList();
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  Future<List<SavingsGoalModel>> getGoals(String householdId) async {
+    final rows = await getGoalRows(householdId);
+    return rows.map(SavingsGoalModel.fromJson).toList();
   }
 
   Future<SavingsGoalModel> createGoal({
@@ -62,7 +68,12 @@ final savingsRepositoryProvider = Provider<SavingsRepository>((ref) {
 final savingsGoalsProvider = FutureProvider<List<SavingsGoalModel>>((ref) async {
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) return [];
-  return ref
-      .watch(savingsRepositoryProvider)
-      .getGoals(profile!.householdId!);
+  final householdId = profile!.householdId!;
+  final repo = ref.watch(savingsRepositoryProvider);
+  return fetchWithCache(
+    ref: ref,
+    key: 'goals_$householdId',
+    fetch: () => repo.getGoalRows(householdId),
+    parse: SavingsGoalModel.fromJson,
+  );
 });

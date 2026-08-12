@@ -6,6 +6,7 @@ import 'core/constants/app_colors.dart';
 import 'core/constants/app_text_styles.dart';
 import 'core/constants/app_theme.dart';
 import 'core/l10n/app_strings.dart';
+import 'core/widgets/offline_banner.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/presentation/household_link_screen.dart';
 import 'features/auth/presentation/join_screen.dart';
@@ -253,35 +254,43 @@ class _AppShellState extends ConsumerState<_AppShell> {
     });
 
     return Scaffold(
-      body: GestureDetector(
-        onHorizontalDragEnd: (details) {
-          final v = details.primaryVelocity ?? 0;
-          if (v < -600 && currentIndex < _tabs.length - 1) {
-            context.go(_tabs[currentIndex + 1]);
-          } else if (v > 600 && currentIndex > 0) {
-            context.go(_tabs[currentIndex - 1]);
-          }
-        },
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 280),
-          transitionBuilder: (child, animation) {
-            final begin = Offset(goingRight ? 1.0 : -1.0, 0);
-            final slide =
-                Tween<Offset>(begin: begin, end: Offset.zero).animate(
-              CurvedAnimation(
-                  parent: animation, curve: Curves.easeOutCubic),
-            );
-            return SlideTransition(position: slide, child: child);
-          },
-          child: KeyedSubtree(
-            key: ValueKey(location),
-            child: widget.child,
-          ),
-        ),
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(child: _buildBody(context, location, goingRight)),
+        ],
       ),
       floatingActionButton: _buildFab(context, currentIndex, financeTab),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _buildNavBar(context, currentIndex),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, String location, bool goingRight) {
+    final currentIndex = _indexForLocation(location);
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        final v = details.primaryVelocity ?? 0;
+        if (v < -600 && currentIndex < _tabs.length - 1) {
+          context.go(_tabs[currentIndex + 1]);
+        } else if (v > 600 && currentIndex > 0) {
+          context.go(_tabs[currentIndex - 1]);
+        }
+      },
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        transitionBuilder: (child, animation) {
+          final begin = Offset(goingRight ? 1.0 : -1.0, 0);
+          final slide = Tween<Offset>(begin: begin, end: Offset.zero).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          );
+          return SlideTransition(position: slide, child: child);
+        },
+        child: KeyedSubtree(
+          key: ValueKey(location),
+          child: widget.child,
+        ),
+      ),
     );
   }
 }

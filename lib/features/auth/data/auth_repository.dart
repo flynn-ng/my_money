@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/supabase_constants.dart';
+import '../../../core/offline/offline_cache.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../domain/household_model.dart';
 import '../domain/profile_model.dart';
@@ -30,6 +31,8 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
+    // Household rows cached for offline use must not outlive the session.
+    await const OfflineCache().clear();
     await _client.auth.signOut();
   }
 

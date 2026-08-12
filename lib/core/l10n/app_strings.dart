@@ -282,6 +282,73 @@ class S {
         'Please enable notifications in your browser settings.',
       );
 
+  // Install guide (add to home screen)
+  static String get installGuideRow =>
+      _t('Cài app vào máy', 'Install the app');
+  static String get installGuideTitle =>
+      _t('Cài app vào màn hình chính', 'Add the app to your home screen');
+  static String get installGuideSubtitle => _t(
+        'Mở nhanh như app thật, chạy toàn màn hình và nhận được thông báo.',
+        'Opens like a real app, runs full screen, and can receive notifications.',
+      );
+  static String get installGuideYourDevice =>
+      _t('Thiết bị của bạn', 'Your device');
+  static String get installNow => _t('Cài đặt ngay', 'Install now');
+  static String get installOrManually =>
+      _t('HOẶC LÀM THỦ CÔNG', 'OR DO IT MANUALLY');
+  static String get installAppDone =>
+      _t('Đã cài đặt ứng dụng', 'App installed');
+  static String get installGuideFooter => _t(
+        'Sau khi cài, mở app từ màn hình chính rồi vào Cài đặt để bật thông báo.',
+        'After installing, open the app from your home screen, then turn on '
+            'notifications in Settings.',
+      );
+
+  static String get installIosTitle => 'iPhone / iPad — Safari';
+  static List<String> get installIosSteps => [
+        _t('Mở de-money.pages.dev bằng Safari.',
+            'Open de-money.pages.dev in Safari.'),
+        _t('Nhấn nút Chia sẻ (ô vuông có mũi tên) ở thanh dưới.',
+            'Tap the Share button (square with an arrow) in the bottom bar.'),
+        _t('Kéo xuống, chọn "Thêm vào MH chính".',
+            'Scroll down and choose "Add to Home Screen".'),
+        _t('Nhấn "Thêm" ở góc trên bên phải.',
+            'Tap "Add" in the top-right corner.'),
+      ];
+  static String get installIosNote => _t(
+        'Phải dùng Safari — Chrome trên iPhone không cài được.',
+        'Safari is required — Chrome on iPhone cannot install it.',
+      );
+
+  static String get installAndroidTitle => 'Android — Chrome';
+  static List<String> get installAndroidSteps => [
+        _t('Mở de-money.pages.dev bằng Chrome.',
+            'Open de-money.pages.dev in Chrome.'),
+        _t('Nhấn nút ⋮ ở góc trên bên phải.',
+            'Tap the ⋮ button in the top-right corner.'),
+        _t('Chọn "Cài đặt ứng dụng" hoặc "Thêm vào Màn hình chính".',
+            'Choose "Install app" or "Add to Home screen".'),
+        _t('Nhấn "Cài đặt" để xác nhận.', 'Tap "Install" to confirm.'),
+      ];
+
+  static String get installDesktopTitle => _t(
+        'Máy tính — Chrome / Edge',
+        'Desktop — Chrome / Edge',
+      );
+  static List<String> get installDesktopSteps => [
+        _t('Mở de-money.pages.dev bằng Chrome hoặc Edge.',
+            'Open de-money.pages.dev in Chrome or Edge.'),
+        _t('Nhấn biểu tượng cài đặt ở cuối thanh địa chỉ.',
+            'Click the install icon at the end of the address bar.'),
+        _t('Nhấn "Cài đặt". App sẽ mở trong cửa sổ riêng.',
+            'Click "Install". The app opens in its own window.'),
+      ];
+
+  // Offline
+  static String get offlineTitle => _t('Đang ngoại tuyến', 'Offline');
+  static String get offlineHint =>
+      _t('đang xem dữ liệu đã lưu', 'showing saved data');
+
   // Common
   static String get retry => _t('Thử lại', 'Retry');
   static String get cancel => _t('Huỷ', 'Cancel');
