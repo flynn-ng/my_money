@@ -498,6 +498,12 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
         grouped.putIfAbsent(tx.date.fullDate, () => []).add(tx);
       }
     }
+    // Newest entry first within a day, matching the day headers above it. The
+    // query already sorts this way; sorting here keeps the invariant for rows
+    // replayed from an older offline cache too.
+    for (final dayTxs in grouped.values) {
+      dayTxs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
     _grouped = grouped;
     _keys = grouped.keys.toList();
   }

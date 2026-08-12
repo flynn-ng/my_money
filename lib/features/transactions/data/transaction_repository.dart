@@ -24,7 +24,10 @@ class TransactionRepository {
         .eq('household_id', householdId)
         .gte('date', fromStr)
         .lte('date', toStr)
-        .order('date', ascending: false);
+        // Secondary sort: without it Postgres is free to return same-day rows
+        // in any order, so the list reshuffles on every refetch.
+        .order('date', ascending: false)
+        .order('created_at', ascending: false);
     return List<Map<String, dynamic>>.from(data);
   }
 
@@ -44,7 +47,8 @@ class TransactionRepository {
         .eq('household_id', householdId)
         .gte('date', from)
         .lte('date', to)
-        .order('date', ascending: false);
+        .order('date', ascending: false)
+        .order('created_at', ascending: false);
     return List<Map<String, dynamic>>.from(data);
   }
 
