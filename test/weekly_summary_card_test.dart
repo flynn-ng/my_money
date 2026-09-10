@@ -62,6 +62,7 @@ Future<void> _pump(
   ThemeData? theme,
   void Function(String categoryId)? onCategoryTap,
   VoidCallback? onClearFilters,
+  VoidCallback? onShowTransactions,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1.0;
@@ -75,6 +76,7 @@ Future<void> _pump(
           summary: summary,
           onCategoryTap: onCategoryTap,
           onClearFilters: onClearFilters,
+          onShowTransactions: onShowTransactions,
         ),
       ),
     ),
@@ -141,6 +143,29 @@ void main() {
     );
 
     expect(find.text('Đã chi'), findsOneWidget);
+  });
+
+  group('transactions link', () {
+    testWidgets('only appears when there is somewhere to go', (tester) async {
+      await _pump(tester, _summary(categories: _categories));
+
+      expect(find.text('Xem giao dịch trong tuần'), findsNothing);
+    });
+
+    testWidgets('opens the list of transactions behind the numbers',
+        (tester) async {
+      var opened = 0;
+      await _pump(
+        tester,
+        _summary(categories: _categories),
+        onShowTransactions: () => opened++,
+      );
+
+      await tester.tap(find.text('Xem giao dịch trong tuần'));
+      await tester.pumpAndSettle();
+
+      expect(opened, 1);
+    });
   });
 
   group('category list', () {

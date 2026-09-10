@@ -121,6 +121,10 @@ class S {
   static String weekFilterCount(int count) =>
       _t('$count danh mục', '$count categories');
   static String get weekFilterClear => _t('Bỏ chọn', 'Clear');
+  static String get weekViewTransactions =>
+      _t('Xem giao dịch trong tuần', 'View this week\'s transactions');
+  static String get weekTransactionsTitle =>
+      _t('Giao dịch trong tuần', 'This week\'s transactions');
   static List<String> get weekdayShort => activeLocale == 'en'
       ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       : const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];

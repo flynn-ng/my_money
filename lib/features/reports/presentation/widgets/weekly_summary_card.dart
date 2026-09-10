@@ -13,6 +13,7 @@ import '../../../../core/widgets/loading_overlay.dart';
 import '../../data/reports_repository.dart';
 import '../../data/weekly_summary_repository.dart';
 import 'weekly_day_bars.dart';
+import 'weekly_transactions_sheet.dart';
 
 /// The "Theo tuần" block on the reports screen: its own week navigator plus the
 /// card below it.
@@ -90,6 +91,7 @@ class WeeklySummarySection extends ConsumerWidget {
                 .toggle(categoryId),
             onClearFilters: () =>
                 ref.read(weekCategoryFilterProvider.notifier).clear(),
+            onShowTransactions: () => WeeklyTransactionsSheet.show(context),
           ),
         ),
       ],
@@ -125,11 +127,15 @@ class WeeklySummaryCard extends StatefulWidget {
   /// Clears every selected category at once.
   final VoidCallback? onClearFilters;
 
+  /// Opens the list of transactions the numbers are made of.
+  final VoidCallback? onShowTransactions;
+
   const WeeklySummaryCard({
     super.key,
     required this.summary,
     this.onCategoryTap,
     this.onClearFilters,
+    this.onShowTransactions,
   });
 
   @override
@@ -238,6 +244,11 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
             ),
           ],
         ),
+        if (widget.onShowTransactions != null) ...[
+          const SizedBox(height: 12),
+          Divider(height: 1, color: context.colors.divider),
+          _ShowTransactionsRow(onTap: widget.onShowTransactions!),
+        ],
         if (summary.categories.isNotEmpty) ...[
           const SizedBox(height: 12),
           Divider(height: 1, color: context.colors.divider),
@@ -288,6 +299,36 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
 
   double get _categoryTotal =>
       summary.categories.fold<double>(0, (sum, c) => sum + c.amount);
+}
+
+/// Way into the transactions behind the numbers — the card shows totals for
+/// income too, and without this there is nothing on screen explaining them.
+class _ShowTransactionsRow extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ShowTransactionsRow({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.receipt_long_outlined,
+                size: 16, color: context.colors.textSecondary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(S.weekViewTransactions, style: context.tsBodyLarge),
+            ),
+            Icon(Icons.chevron_right,
+                size: 18, color: context.colors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _CategoryHeader extends StatelessWidget {
