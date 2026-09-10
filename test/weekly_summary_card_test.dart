@@ -11,6 +11,7 @@ WeeklySummary _summary({
   double expense = 2400000,
   double previousExpense = 2000000,
   List<CategorySpending> categories = const [],
+  List<CategorySpending> incomeCategories = const [],
   int elapsedDays = 7,
   Set<String> categoryFilters = const {},
 }) =>
@@ -28,6 +29,7 @@ WeeklySummary _summary({
           ),
       ],
       categories: categories,
+      incomeCategories: incomeCategories,
       elapsedDays: elapsedDays,
       categoryFilters: categoryFilters,
     );
@@ -165,6 +167,79 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(opened, 1);
+    });
+  });
+
+  group('income categories', () {
+    const salary = CategorySpending(
+        categoryId: 'salary',
+        categoryName: 'Lương',
+        categoryIcon: '💰',
+        categoryColor: '#16A34A',
+        amount: 17000000);
+
+    testWidgets('are hidden until the list is opened', (tester) async {
+      await _pump(
+        tester,
+        _summary(categories: _categories, incomeCategories: const [salary]),
+      );
+
+      expect(find.text('Lương'), findsNothing);
+      // Three expense categories plus the income one.
+      expect(find.text('Xem tất cả (4)'), findsOneWidget);
+
+      await tester.tap(find.text('Xem tất cả (4)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lương'), findsOneWidget);
+    });
+
+    testWidgets('are signed and coloured as money in', (tester) async {
+      await _pump(
+        tester,
+        _summary(categories: _categories, incomeCategories: const [salary]),
+      );
+      await tester.tap(find.text('Xem tất cả (4)'));
+      await tester.pumpAndSettle();
+
+      final amount = tester.widget<Text>(find.text('+17.0 triệu₫'));
+      final expenseAmount = tester.widget<Text>(find.text('1.2 triệu₫'));
+      expect(amount.style!.color, isNot(expenseAmount.style!.color));
+    });
+
+    testWidgets('can be selected like an expense category', (tester) async {
+      final tapped = <String>[];
+      await _pump(
+        tester,
+        _summary(categories: _categories, incomeCategories: const [salary]),
+        onCategoryTap: tapped.add,
+      );
+      await tester.tap(find.text('Xem tất cả (4)'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Lương'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, ['salary']);
+    });
+
+    testWidgets('a week with income but no spending shows them straight away',
+        (tester) async {
+      await _pump(
+        tester,
+        _summary(
+          expense: 0,
+          previousExpense: 0,
+          categories: const [],
+          incomeCategories: const [salary],
+        ),
+      );
+
+      // Nothing to rank, so nothing to hide behind an expand button.
+      expect(find.text('Lương'), findsOneWidget);
+      expect(find.textContaining('Xem tất cả'), findsNothing);
+      expect(find.text('Chi nhiều nhất'), findsNothing);
+      expect(find.text('Thu nhập'), findsWidgets); // header + the metric above
     });
   });
 

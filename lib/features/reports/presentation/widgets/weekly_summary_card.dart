@@ -249,13 +249,17 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
           Divider(height: 1, color: context.colors.divider),
           _ShowTransactionsRow(onTap: widget.onShowTransactions!),
         ],
-        if (summary.categories.isNotEmpty) ...[
+        if (summary.categoryCount > 0) ...[
           const SizedBox(height: 12),
           Divider(height: 1, color: context.colors.divider),
           const SizedBox(height: 12),
           _CategoryHeader(
-            total: summary.categories.length,
+            total: summary.categoryCount,
             expanded: _expanded,
+            canExpand: _hasHiddenCategories,
+            // With no spending at all the section is the income list, and
+            // calling that "Chi nhiều nhất" would be a lie.
+            incomeOnly: summary.categories.isEmpty,
             onToggle: () => setState(() => _expanded = !_expanded),
           ),
           const SizedBox(height: 10),
@@ -283,6 +287,29 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
                         : () => widget
                             .onCategoryTap!(_visibleCategories[i].categoryId),
                   ),
+                // Income waits until the list is opened, since the collapsed
+                // card is a spending ranking — unless there is no spending to
+                // rank, in which case hiding it would leave nothing at all.
+                if (_showIncome) ...[
+                  if (summary.categories.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(S.totalIncome, style: AppTextStyles.labelSmall),
+                    const SizedBox(height: 10),
+                  ],
+                  for (var i = 0; i < summary.incomeCategories.length; i++)
+                    _CategoryRow(
+                      spending: summary.incomeCategories[i],
+                      total: _incomeTotal,
+                      isLast: i == summary.incomeCategories.length - 1,
+                      isIncome: true,
+                      selected: summary
+                          .isSelected(summary.incomeCategories[i].categoryId),
+                      onTap: widget.onCategoryTap == null
+                          ? null
+                          : () => widget.onCategoryTap!(
+                              summary.incomeCategories[i].categoryId),
+                    ),
+                ],
               ],
             ),
           ),
@@ -290,6 +317,15 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
       ],
     );
   }
+
+  /// Whether anything is being held back behind "Xem tất cả".
+  bool get _hasHiddenCategories =>
+      summary.categories.length > WeeklySummaryRepository.topCategoryCount ||
+      (summary.incomeCategories.isNotEmpty && summary.categories.isNotEmpty);
+
+  bool get _showIncome =>
+      summary.incomeCategories.isNotEmpty &&
+      (_expanded || summary.categories.isEmpty);
 
   List<CategorySpending> get _visibleCategories => _expanded
       ? summary.categories
@@ -299,6 +335,9 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
 
   double get _categoryTotal =>
       summary.categories.fold<double>(0, (sum, c) => sum + c.amount);
+
+  double get _incomeTotal =>
+      summary.incomeCategories.fold<double>(0, (sum, c) => sum + c.amount);
 }
 
 /// Way into the transactions behind the numbers — the card shows totals for
@@ -334,25 +373,28 @@ class _ShowTransactionsRow extends StatelessWidget {
 class _CategoryHeader extends StatelessWidget {
   final int total;
   final bool expanded;
+  final bool canExpand;
+  final bool incomeOnly;
   final VoidCallback onToggle;
 
   const _CategoryHeader({
     required this.total,
     required this.expanded,
+    required this.canExpand,
+    required this.incomeOnly,
     required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
-    final canExpand = total > WeeklySummaryRepository.topCategoryCount;
+    final label = expanded
+        ? S.weekAllCategories
+        : (incomeOnly ? S.totalIncome : S.weekTopCategories);
 
     return Row(
       children: [
         Expanded(
-          child: Text(
-            expanded ? S.weekAllCategories : S.weekTopCategories,
-            style: AppTextStyles.labelSmall,
-          ),
+          child: Text(label, style: AppTextStyles.labelSmall),
         ),
         if (canExpand)
           InkWell(
@@ -528,6 +570,9 @@ class _CategoryRow extends StatelessWidget {
   final double total;
   final bool isLast;
   final bool selected;
+
+  /// Income reads as money in: signed, and green like everywhere else.
+  final bool isIncome;
   final VoidCallback? onTap;
 
   const _CategoryRow({
@@ -535,6 +580,7 @@ class _CategoryRow extends StatelessWidget {
     required this.total,
     required this.isLast,
     this.selected = false,
+    this.isIncome = false,
     this.onTap,
   });
 
@@ -594,9 +640,14 @@ class _CategoryRow extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          spending.amount.asCompactCurrency,
-                          style: AppTextStyles.bodyLarge
-                              .copyWith(color: context.colors.textPrimary),
+                          isIncome
+                              ? '+${spending.amount.asCompactCurrency}'
+                              : spending.amount.asCompactCurrency,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: isIncome
+                                ? AppColors.green
+                                : context.colors.textPrimary,
+                          ),
                         ),
                       ],
                     ),
