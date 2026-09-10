@@ -30,7 +30,7 @@ auth/        — login, register, household link/join; authStateProvider + curre
 transactions/ — transaction CRUD, categories; selectedMonthProvider drives transactionsProvider
 budget/      — per-category monthly limits
 savings/     — savings goals + contributions
-reports/     — fl_chart bar/pie charts, last-6-months data
+reports/     — fl_chart bar/pie charts, last-6-months data, weekly summary (Mon-start weeks, `selectedWeekProvider`)
 home/        — FinanceScreen (3-tab: Transactions / Budget / Savings); financeTabProvider
 household/   — household management screen (name, members, invite)
 profile/     — profile + settings screen
@@ -45,6 +45,8 @@ Each feature follows `data/` (model + repository + providers) → `domain/` (if 
 **Modal sheets:** screens presented as bottom sheets (e.g. `AddTransactionScreen.show(context)`, `AddGoalScreen.show(context)`) are full-screen sheets wrapped in `SheetWrapper` + `DraggableScrollableSheet`. Prefer this pattern over pushing a new route for forms.
 
 **Providers:** `currentProfileProvider` is the root dependency for anything household-scoped — always guard with `if (profile?.householdId == null) return []`.
+
+**Transaction change signal:** `transactionsProvider` only ever holds the selected month, so a provider with its own date range (the weekly summary spans two months at a month boundary) cannot watch it. Those watch `transactionsRevisionProvider` instead — a counter that every writer bumps next to its `ref.invalidate(transactionsProvider)`, including the realtime callback. Add the bump whenever you add a new write path.
 
 ## Database (Supabase)
 Tables: `households`, `profiles`, `categories`, `transactions`, `budgets`, `savings_goals`, `savings_contributions`

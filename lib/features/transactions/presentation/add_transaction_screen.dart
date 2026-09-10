@@ -135,6 +135,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
       }
       ref.invalidate(transactionsProvider);
+      ref.read(transactionsRevisionProvider.notifier).bump();
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {

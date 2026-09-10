@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/supabase_constants.dart';
+import '../../../core/extensions/datetime_ext.dart';
 import '../../../core/offline/offline_cache.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../auth/data/auth_repository.dart';
@@ -34,6 +35,29 @@ class TransactionRepository {
   Future<List<TransactionModel>> getTransactionsForDateRange(
       String householdId, DateTime from, DateTime to) async {
     final rows = await getTransactionRowsForDateRange(householdId, from, to);
+    return rows.map(TransactionModel.fromJson).toList();
+  }
+
+  /// Rows between two exact days, both ends included.
+  ///
+  /// [getTransactionRowsForDateRange] widens its bounds to whole months, which
+  /// a week straddling a month boundary cannot use.
+  Future<List<Map<String, dynamic>>> getTransactionRowsForDayRange(
+      String householdId, DateTime from, DateTime to) async {
+    final data = await _client
+        .from(tableTransactions)
+        .select('*, categories(*), profiles(display_name)')
+        .eq('household_id', householdId)
+        .gte('date', from.isoDate)
+        .lte('date', to.isoDate)
+        .order('date', ascending: false)
+        .order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  Future<List<TransactionModel>> getTransactionsForDayRange(
+      String householdId, DateTime from, DateTime to) async {
+    final rows = await getTransactionRowsForDayRange(householdId, from, to);
     return rows.map(TransactionModel.fromJson).toList();
   }
 
@@ -170,6 +194,26 @@ final transactionsProvider =
   );
 });
 
+// ── Change signal ─────────────────────────────────────────────────────────────
+
+/// Counter bumped once after every transaction write and on every realtime
+/// change.
+///
+/// [transactionsProvider] only ever holds the selected month, so providers with
+/// their own date range — the weekly summary spans two calendar months at a
+/// month boundary — cannot just watch it. They watch this instead, which keeps
+/// writers from having to know about each derived provider.
+class TransactionsRevisionNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state = state + 1;
+}
+
+final transactionsRevisionProvider =
+    NotifierProvider<TransactionsRevisionNotifier, int>(
+        TransactionsRevisionNotifier.new);
+
 // ── Realtime subscription ─────────────────────────────────────────────────────
 
 // Subscribes to INSERT/UPDATE/DELETE on the transactions table for the active
@@ -195,6 +239,7 @@ final transactionRealtimeProvider = Provider.autoDispose<void>((ref) {
         ),
         callback: (_) {
           ref.invalidate(transactionsProvider);
+          ref.read(transactionsRevisionProvider.notifier).bump();
         },
       )
       .subscribe();

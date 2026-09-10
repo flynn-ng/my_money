@@ -98,6 +98,23 @@ class S {
   static String get totalExpense => _t('Chi tiêu', 'Expense');
   static String get netSaved => _t('Còn lại', 'Remaining');
 
+  // Weekly summary
+  static String get weeklyTitle => _t('Theo tuần', 'Weekly');
+  static String get weekThis => _t('Tuần này', 'This week');
+  static String get weekSpent => _t('Đã chi', 'Spent');
+  static String get weekDailyAvg => _t('TB mỗi ngày', 'Daily avg');
+  static String get weekVsLastWeek =>
+      _t('so với tuần trước', 'vs last week');
+  static String get weekNoComparison =>
+      _t('Tuần trước không có chi tiêu', 'No spending last week');
+  static String get weekNoSpending =>
+      _t('Chưa có giao dịch tuần này', 'No transactions this week');
+  static String get weekTopCategories =>
+      _t('Chi nhiều nhất', 'Top spending');
+  static List<String> get weekdayShort => activeLocale == 'en'
+      ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      : const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+
   // CSV export
   static String get exportCsv => _t('Xuất CSV', 'Export CSV');
   static String get exportNoData =>
