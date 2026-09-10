@@ -35,7 +35,7 @@ class ReportsScreen extends ConsumerWidget {
           onRefresh: () async {
             ref.invalidate(transactionsProvider);
             ref.invalidate(last6MonthsProvider);
-            ref.invalidate(weeklySummaryProvider);
+            ref.invalidate(weeklyTransactionsProvider);
           },
           child: CustomScrollView(
             slivers: [

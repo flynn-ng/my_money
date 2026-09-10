@@ -81,13 +81,15 @@ class WeeklySummarySection extends ConsumerWidget {
           loading: () => const SizedBox(height: 260, child: LoadingOverlay()),
           error: (e, _) => ErrorDisplay(
             error: e,
-            onRetry: () => ref.invalidate(weeklySummaryProvider),
+            onRetry: () => ref.invalidate(weeklyTransactionsProvider),
           ),
           data: (summary) => WeeklySummaryCard(
             summary: summary,
             onCategoryTap: (categoryId) => ref
                 .read(weekCategoryFilterProvider.notifier)
                 .toggle(categoryId),
+            onClearFilters: () =>
+                ref.read(weekCategoryFilterProvider.notifier).clear(),
           ),
         ),
       ],
@@ -116,14 +118,18 @@ class _ThisWeekPill extends StatelessWidget {
 class WeeklySummaryCard extends StatefulWidget {
   final WeeklySummary summary;
 
-  /// Called with the category tapped in the list. Null leaves the rows inert,
+  /// Called with the category ticked in the list. Null leaves the rows inert,
   /// which is what the widget tests want.
   final void Function(String categoryId)? onCategoryTap;
+
+  /// Clears every selected category at once.
+  final VoidCallback? onClearFilters;
 
   const WeeklySummaryCard({
     super.key,
     required this.summary,
     this.onCategoryTap,
+    this.onClearFilters,
   });
 
   @override
@@ -144,9 +150,9 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
-      // A filtered week with nothing in that category still needs its category
-      // list on screen, otherwise there is no way back out of the filter.
-      child: summary.isEmpty && summary.categoryFilter == null
+      // A filtered week with nothing in those categories still needs its
+      // category list on screen, otherwise there is no way back out.
+      child: summary.isEmpty && !summary.isFiltered
           ? _empty(context)
           : _content(context),
     );
@@ -164,15 +170,16 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
   Widget _content(BuildContext context) {
     final percent = summary.expenseChangePercent;
 
-    final filtered = summary.filteredCategory;
+    final filtered = summary.filteredCategories;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (filtered != null) ...[
-          _FilterChip(
-            spending: filtered,
-            onClear: () => widget.onCategoryTap?.call(filtered.categoryId),
+        if (summary.isFiltered) ...[
+          _FilterBar(
+            selected: filtered,
+            count: summary.categoryFilters.length,
+            onClear: widget.onClearFilters,
           ),
           const SizedBox(height: 12),
         ],
@@ -241,18 +248,33 @@ class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
             onToggle: () => setState(() => _expanded = !_expanded),
           ),
           const SizedBox(height: 10),
-          for (var i = 0; i < _visibleCategories.length; i++)
-            _CategoryRow(
-              spending: _visibleCategories[i],
-              // Shares are read against the week, not against the filtered
-              // total — otherwise the selected category would always show 100%.
-              total: _categoryTotal,
-              isLast: i == _visibleCategories.length - 1,
-              selected: _visibleCategories[i].categoryId == summary.categoryFilter,
-              onTap: widget.onCategoryTap == null
-                  ? null
-                  : () => widget.onCategoryTap!(_visibleCategories[i].categoryId),
+          // Expanding the list is the one place the card changes height on its
+          // own; animating it keeps the report below from jumping.
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < _visibleCategories.length; i++)
+                  _CategoryRow(
+                    spending: _visibleCategories[i],
+                    // Shares are read against the week, not against the
+                    // filtered total — otherwise a selected category would
+                    // always show 100%.
+                    total: _categoryTotal,
+                    isLast: i == _visibleCategories.length - 1,
+                    selected:
+                        summary.isSelected(_visibleCategories[i].categoryId),
+                    onTap: widget.onCategoryTap == null
+                        ? null
+                        : () => widget
+                            .onCategoryTap!(_visibleCategories[i].categoryId),
+                  ),
+              ],
             ),
+          ),
         ],
       ],
     );
@@ -319,46 +341,44 @@ class _CategoryHeader extends StatelessWidget {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final CategorySpending spending;
-  final VoidCallback onClear;
+/// Says what the numbers below are counting, and offers one tap back out.
+class _FilterBar extends StatelessWidget {
+  final List<CategorySpending> selected;
 
-  const _FilterChip({required this.spending, required this.onClear});
+  /// Selected ids, which can outnumber [selected] when a picked category has no
+  /// spending in the week being shown.
+  final int count;
+  final VoidCallback? onClear;
+
+  const _FilterBar({
+    required this.selected,
+    required this.count,
+    this.onClear,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // One category reads better by name; several would not fit, so they are
+    // counted instead.
+    final label = selected.length == 1
+        ? '${selected.first.categoryIcon} ${selected.first.categoryName}'
+        : S.weekFilterCount(count);
+
     return Row(
       children: [
         Flexible(
-          child: InkWell(
-            onTap: onClear,
-            borderRadius: BorderRadius.circular(999),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: context.colors.textPrimary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(spending.categoryIcon,
-                      style: const TextStyle(fontSize: 13)),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      spending.categoryName,
-                      style: AppTextStyles.labelSmall
-                          .copyWith(color: context.colors.textPrimary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(Icons.close,
-                      size: 14, color: context.colors.textSecondary),
-                ],
-              ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: context.colors.textPrimary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              label,
+              style: AppTextStyles.labelSmall
+                  .copyWith(color: context.colors.textPrimary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
@@ -371,6 +391,23 @@ class _FilterChip extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (onClear != null)
+          InkWell(
+            onTap: onClear,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.close,
+                      size: 14, color: context.colors.textSecondary),
+                  const SizedBox(width: 2),
+                  Text(S.weekFilterClear, style: AppTextStyles.labelSmall),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -481,6 +518,23 @@ class _CategoryRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (onTap != null) ...[
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Checkbox(
+                    value: selected,
+                    // The whole row is the tap target; the box just reflects it.
+                    onChanged: (_) => onTap!(),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    side: BorderSide(color: context.colors.textSecondary),
+                    activeColor: context.colors.textPrimary,
+                    checkColor: context.colors.background,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               Text(spending.categoryIcon, style: const TextStyle(fontSize: 16)),
               const SizedBox(width: 8),
               Expanded(
