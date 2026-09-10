@@ -83,7 +83,12 @@ class WeeklySummarySection extends ConsumerWidget {
             error: e,
             onRetry: () => ref.invalidate(weeklySummaryProvider),
           ),
-          data: (summary) => WeeklySummaryCard(summary: summary),
+          data: (summary) => WeeklySummaryCard(
+            summary: summary,
+            onCategoryTap: (categoryId) => ref
+                .read(weekCategoryFilterProvider.notifier)
+                .toggle(categoryId),
+          ),
         ),
       ],
     );
@@ -108,9 +113,27 @@ class _ThisWeekPill extends StatelessWidget {
   }
 }
 
-class WeeklySummaryCard extends StatelessWidget {
+class WeeklySummaryCard extends StatefulWidget {
   final WeeklySummary summary;
-  const WeeklySummaryCard({super.key, required this.summary});
+
+  /// Called with the category tapped in the list. Null leaves the rows inert,
+  /// which is what the widget tests want.
+  final void Function(String categoryId)? onCategoryTap;
+
+  const WeeklySummaryCard({
+    super.key,
+    required this.summary,
+    this.onCategoryTap,
+  });
+
+  @override
+  State<WeeklySummaryCard> createState() => _WeeklySummaryCardState();
+}
+
+class _WeeklySummaryCardState extends State<WeeklySummaryCard> {
+  bool _expanded = false;
+
+  WeeklySummary get summary => widget.summary;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +144,11 @@ class WeeklySummaryCard extends StatelessWidget {
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: summary.isEmpty ? _empty(context) : _content(context),
+      // A filtered week with nothing in that category still needs its category
+      // list on screen, otherwise there is no way back out of the filter.
+      child: summary.isEmpty && summary.categoryFilter == null
+          ? _empty(context)
+          : _content(context),
     );
   }
 
@@ -137,9 +164,18 @@ class WeeklySummaryCard extends StatelessWidget {
   Widget _content(BuildContext context) {
     final percent = summary.expenseChangePercent;
 
+    final filtered = summary.filteredCategory;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (filtered != null) ...[
+          _FilterChip(
+            spending: filtered,
+            onClear: () => widget.onCategoryTap?.call(filtered.categoryId),
+          ),
+          const SizedBox(height: 12),
+        ],
         Text(S.weekSpent, style: AppTextStyles.labelSmall),
         const SizedBox(height: 2),
         Row(
@@ -195,19 +231,146 @@ class WeeklySummaryCard extends StatelessWidget {
             ),
           ],
         ),
-        if (summary.topCategories.isNotEmpty) ...[
+        if (summary.categories.isNotEmpty) ...[
           const SizedBox(height: 12),
           Divider(height: 1, color: context.colors.divider),
           const SizedBox(height: 12),
-          Text(S.weekTopCategories, style: AppTextStyles.labelSmall),
+          _CategoryHeader(
+            total: summary.categories.length,
+            expanded: _expanded,
+            onToggle: () => setState(() => _expanded = !_expanded),
+          ),
           const SizedBox(height: 10),
-          for (var i = 0; i < summary.topCategories.length; i++)
+          for (var i = 0; i < _visibleCategories.length; i++)
             _CategoryRow(
-              spending: summary.topCategories[i],
-              total: summary.expense,
-              isLast: i == summary.topCategories.length - 1,
+              spending: _visibleCategories[i],
+              // Shares are read against the week, not against the filtered
+              // total — otherwise the selected category would always show 100%.
+              total: _categoryTotal,
+              isLast: i == _visibleCategories.length - 1,
+              selected: _visibleCategories[i].categoryId == summary.categoryFilter,
+              onTap: widget.onCategoryTap == null
+                  ? null
+                  : () => widget.onCategoryTap!(_visibleCategories[i].categoryId),
             ),
         ],
+      ],
+    );
+  }
+
+  List<CategorySpending> get _visibleCategories => _expanded
+      ? summary.categories
+      : summary.categories
+          .take(WeeklySummaryRepository.topCategoryCount)
+          .toList();
+
+  double get _categoryTotal =>
+      summary.categories.fold<double>(0, (sum, c) => sum + c.amount);
+}
+
+class _CategoryHeader extends StatelessWidget {
+  final int total;
+  final bool expanded;
+  final VoidCallback onToggle;
+
+  const _CategoryHeader({
+    required this.total,
+    required this.expanded,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final canExpand = total > WeeklySummaryRepository.topCategoryCount;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            expanded ? S.weekAllCategories : S.weekTopCategories,
+            style: AppTextStyles.labelSmall,
+          ),
+        ),
+        if (canExpand)
+          InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    expanded ? S.weekShowLess : S.weekShowAll(total),
+                    style: AppTextStyles.labelSmall
+                        .copyWith(color: context.colors.textPrimary),
+                  ),
+                  Icon(
+                    expanded ? Icons.expand_less : Icons.expand_more,
+                    size: 16,
+                    color: context.colors.textPrimary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final CategorySpending spending;
+  final VoidCallback onClear;
+
+  const _FilterChip({required this.spending, required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(
+          child: InkWell(
+            onTap: onClear,
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: context.colors.textPrimary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(spending.categoryIcon,
+                      style: const TextStyle(fontSize: 13)),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      spending.categoryName,
+                      style: AppTextStyles.labelSmall
+                          .copyWith(color: context.colors.textPrimary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(Icons.close,
+                      size: 14, color: context.colors.textSecondary),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            S.weekFilterHint,
+            style: AppTextStyles.labelSmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
@@ -286,11 +449,15 @@ class _CategoryRow extends StatelessWidget {
   final CategorySpending spending;
   final double total;
   final bool isLast;
+  final bool selected;
+  final VoidCallback? onTap;
 
   const _CategoryRow({
     required this.spending,
     required this.total,
     required this.isLast,
+    this.selected = false,
+    this.onTap,
   });
 
   @override
@@ -300,48 +467,61 @@ class _CategoryRow extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(spending.categoryIcon, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: selected
+                ? context.colors.textPrimary.withValues(alpha: 0.06)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(spending.categoryIcon, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        spending.categoryName,
-                        style: context.tsBodyLarge,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            spending.categoryName,
+                            style: context.tsBodyLarge,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          spending.amount.asCompactCurrency,
+                          style: AppTextStyles.bodyLarge
+                              .copyWith(color: context.colors.textPrimary),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      spending.amount.asCompactCurrency,
-                      style: AppTextStyles.bodyLarge
-                          .copyWith(color: context.colors.textPrimary),
+                    const SizedBox(height: 4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: share,
+                        minHeight: 6,
+                        backgroundColor: context.colors.divider,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.fromHex(spending.categoryColor)),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: share,
-                    minHeight: 6,
-                    backgroundColor: context.colors.divider,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.fromHex(spending.categoryColor)),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -111,6 +111,13 @@ class S {
       _t('Chưa có giao dịch tuần này', 'No transactions this week');
   static String get weekTopCategories =>
       _t('Chi nhiều nhất', 'Top spending');
+  static String get weekAllCategories =>
+      _t('Tất cả danh mục', 'All categories');
+  static String weekShowAll(int count) =>
+      _t('Xem tất cả ($count)', 'Show all ($count)');
+  static String get weekShowLess => _t('Thu gọn', 'Show less');
+  static String get weekFilterHint =>
+      _t('Chỉ tính danh mục này', 'Counting this category only');
   static List<String> get weekdayShort => activeLocale == 'en'
       ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       : const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];

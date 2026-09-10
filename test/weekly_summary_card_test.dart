@@ -10,8 +10,9 @@ WeeklySummary _summary({
   double income = 18000000,
   double expense = 2400000,
   double previousExpense = 2000000,
-  List<CategorySpending> topCategories = const [],
+  List<CategorySpending> categories = const [],
   int elapsedDays = 7,
+  String? categoryFilter,
 }) =>
     WeeklySummary(
       weekStart: _monday,
@@ -26,8 +27,9 @@ WeeklySummary _summary({
             expense: expense / 7 * (i + 1) / 4,
           ),
       ],
-      topCategories: topCategories,
+      categories: categories,
       elapsedDays: elapsedDays,
+      categoryFilter: categoryFilter,
     );
 
 const _categories = [
@@ -58,6 +60,7 @@ Future<void> _pump(
   WeeklySummary summary, {
   double width = 390,
   ThemeData? theme,
+  void Function(String categoryId)? onCategoryTap,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1.0;
@@ -66,14 +69,19 @@ Future<void> _pump(
   await tester.pumpWidget(MaterialApp(
     theme: theme,
     home: Scaffold(
-      body: SingleChildScrollView(child: WeeklySummaryCard(summary: summary)),
+      body: SingleChildScrollView(
+        child: WeeklySummaryCard(
+          summary: summary,
+          onCategoryTap: onCategoryTap,
+        ),
+      ),
     ),
   ));
 }
 
 void main() {
   testWidgets('lays out spend, week bars, metrics and categories', (tester) async {
-    await _pump(tester, _summary(topCategories: _categories));
+    await _pump(tester, _summary(categories: _categories));
 
     expect(find.text('Đã chi'), findsOneWidget);
     expect(find.text('Ăn uống'), findsOneWidget);
@@ -118,7 +126,7 @@ void main() {
   });
 
   testWidgets('survives a narrow phone', (tester) async {
-    await _pump(tester, _summary(topCategories: _categories), width: 320);
+    await _pump(tester, _summary(categories: _categories), width: 320);
 
     expect(find.text('Đã chi'), findsOneWidget);
   });
@@ -126,10 +134,100 @@ void main() {
   testWidgets('renders in dark mode', (tester) async {
     await _pump(
       tester,
-      _summary(topCategories: _categories),
+      _summary(categories: _categories),
       theme: ThemeData.dark(),
     );
 
     expect(find.text('Đã chi'), findsOneWidget);
+  });
+
+  group('category list', () {
+    const fourth = CategorySpending(
+        categoryId: 'home',
+        categoryName: 'Nhà cửa',
+        categoryIcon: '🏠',
+        categoryColor: '#16A34A',
+        amount: 200000);
+
+    testWidgets('shows only the top three until asked for all', (tester) async {
+      await _pump(tester, _summary(categories: [..._categories, fourth]));
+
+      expect(find.text('Nhà cửa'), findsNothing);
+      expect(find.text('Xem tất cả (4)'), findsOneWidget);
+
+      await tester.tap(find.text('Xem tất cả (4)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nhà cửa'), findsOneWidget);
+      expect(find.text('Thu gọn'), findsOneWidget);
+      expect(find.text('Tất cả danh mục'), findsOneWidget);
+    });
+
+    testWidgets('collapses again', (tester) async {
+      await _pump(tester, _summary(categories: [..._categories, fourth]));
+
+      await tester.tap(find.text('Xem tất cả (4)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Thu gọn'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nhà cửa'), findsNothing);
+    });
+
+    testWidgets('no expand button when everything already fits',
+        (tester) async {
+      await _pump(tester, _summary(categories: _categories));
+
+      expect(find.textContaining('Xem tất cả'), findsNothing);
+    });
+
+    testWidgets('tapping a category reports it', (tester) async {
+      final tapped = <String>[];
+      await _pump(
+        tester,
+        _summary(categories: _categories),
+        onCategoryTap: tapped.add,
+      );
+
+      await tester.tap(find.text('Đi lại'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, ['ride']);
+    });
+
+    testWidgets('a filtered week shows the chip and clears from it',
+        (tester) async {
+      final tapped = <String>[];
+      await _pump(
+        tester,
+        _summary(categories: _categories, categoryFilter: 'food'),
+        onCategoryTap: tapped.add,
+      );
+
+      expect(find.text('Chỉ tính danh mục này'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(tapped, ['food']);
+    });
+
+    testWidgets('an empty category filter still lists the categories',
+        (tester) async {
+      await _pump(
+        tester,
+        _summary(
+          income: 0,
+          expense: 0,
+          previousExpense: 0,
+          categories: _categories,
+          categoryFilter: 'food',
+        ),
+      );
+
+      // The "no transactions" placeholder would strand the user in the filter.
+      expect(find.text('Chưa có giao dịch tuần này'), findsNothing);
+      expect(find.text('Ăn uống'), findsWidgets);
+    });
   });
 }
