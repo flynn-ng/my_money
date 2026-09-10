@@ -376,6 +376,17 @@ void main() {
         expect(summary.categoryFilters, {'nothing-here'});
       });
 
+      test('the transaction list follows the same filter', () {
+        final list = repo.transactionsForWeek(
+          transactions: spread(),
+          weekStart: _monday,
+          categoryIds: {'food'},
+        );
+
+        expect(list.length, 2);
+        expect(list.every((tx) => tx.categoryId == 'food'), isTrue);
+      });
+
       test('no filter leaves every total untouched', () {
         final summary = summarise(spread());
 
@@ -384,6 +395,78 @@ void main() {
         expect(summary.isFiltered, isFalse);
         expect(summary.filteredCategories, isEmpty);
       });
+    });
+  });
+
+  group('transactions behind the numbers', () {
+    List<TransactionModel> around() => [
+          _tx(amount: 100, date: DateTime(2026, 9, 7)), // Monday
+          _tx(amount: 9000000, date: DateTime(2026, 9, 9), type: 'income'),
+          _tx(amount: 300, date: DateTime(2026, 9, 13)), // Sunday
+          _tx(amount: 500, date: DateTime(2026, 9, 6)), // last week
+          _tx(amount: 700, date: DateTime(2026, 9, 14)), // next week
+        ];
+
+    test('keeps only the week, income and expense alike', () {
+      final list = repo.transactionsForWeek(
+        transactions: around(),
+        weekStart: _monday,
+      );
+
+      expect(list.length, 3);
+      expect(list.map((tx) => tx.amount).toSet(), {100, 9000000, 300});
+    });
+
+    test('newest first, matching the transaction list elsewhere', () {
+      final list = repo.transactionsForWeek(
+        transactions: around(),
+        weekStart: _monday,
+      );
+
+      expect(list.map((tx) => tx.date).toList(), [
+        DateTime(2026, 9, 13),
+        DateTime(2026, 9, 9),
+        DateTime(2026, 9, 7),
+      ]);
+    });
+
+    test('same-day rows fall back to creation time, newest first', () {
+      final earlier = TransactionModel(
+        id: 'earlier',
+        householdId: 'h1',
+        paidById: 'p1',
+        categoryId: 'c1',
+        type: 'expense',
+        amount: 1,
+        date: DateTime(2026, 9, 9),
+        createdAt: DateTime(2026, 9, 9, 8),
+      );
+      final later = TransactionModel(
+        id: 'later',
+        householdId: 'h1',
+        paidById: 'p1',
+        categoryId: 'c1',
+        type: 'expense',
+        amount: 2,
+        date: DateTime(2026, 9, 9),
+        createdAt: DateTime(2026, 9, 9, 20),
+      );
+
+      final list = repo.transactionsForWeek(
+        transactions: [earlier, later],
+        weekStart: _monday,
+      );
+
+      expect(list.map((tx) => tx.id).toList(), ['later', 'earlier']);
+    });
+
+    test('a mid-week date still resolves to its Monday', () {
+      final list = repo.transactionsForWeek(
+        transactions: around(),
+        weekStart: DateTime(2026, 9, 10),
+      );
+
+      expect(list.length, 3);
     });
   });
 }

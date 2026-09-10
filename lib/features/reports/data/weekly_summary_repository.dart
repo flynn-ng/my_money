@@ -173,6 +173,33 @@ class WeeklySummaryRepository {
     );
   }
 
+  /// The rows behind the card's numbers: everything inside the week, newest
+  /// first, income and expense alike. [categoryIds] applies the same narrowing
+  /// as [summarise], so the list always matches the totals shown above it.
+  List<TransactionModel> transactionsForWeek({
+    required List<TransactionModel> transactions,
+    required DateTime weekStart,
+    Set<String> categoryIds = const {},
+  }) {
+    final start = weekStart.weekStart;
+    final end = start.addDays(6);
+
+    final result = [
+      for (final tx in transactions)
+        if (categoryIds.isEmpty || categoryIds.contains(tx.categoryId))
+          if (!_dayOf(tx.date).isBefore(start) && !_dayOf(tx.date).isAfter(end))
+            tx,
+    ];
+    result.sort((a, b) {
+      final byDate = b.date.compareTo(a.date);
+      return byDate != 0 ? byDate : b.createdAt.compareTo(a.createdAt);
+    });
+    return result;
+  }
+
+  static DateTime _dayOf(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
   int _elapsedDays(DateTime start, DateTime today) {
     final day = DateTime(today.year, today.month, today.day);
     if (day.isBefore(start)) return 0;
@@ -257,6 +284,23 @@ final weeklyTransactionsProvider =
     fetch: () => txRepo.getTransactionRowsForDayRange(householdId, from, to),
     parse: TransactionModel.fromJson,
   );
+});
+
+/// The week's own transactions, newest first, narrowed by the same category
+/// selection as the card. Derived in memory from [weeklyTransactionsProvider].
+final weekTransactionListProvider =
+    Provider<AsyncValue<List<TransactionModel>>>((ref) {
+  final week = ref.watch(selectedWeekProvider);
+  final categoryIds = ref.watch(weekCategoryFilterProvider);
+  final repo = ref.watch(weeklySummaryRepositoryProvider);
+
+  return ref.watch(weeklyTransactionsProvider).whenData(
+        (transactions) => repo.transactionsForWeek(
+          transactions: transactions,
+          weekStart: week,
+          categoryIds: categoryIds,
+        ),
+      );
 });
 
 /// Synchronous on purpose: ticking a category remaps rows already held in
