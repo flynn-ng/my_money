@@ -35,11 +35,22 @@ class MonthlyTotal {
 }
 
 class ReportsRepository {
-  List<CategorySpending> spendingByCategory(List<TransactionModel> transactions) {
+  /// Expense totals per category, largest first.
+  List<CategorySpending> spendingByCategory(
+          List<TransactionModel> transactions) =>
+      categoryTotals(transactions, TransactionType.expense);
+
+  /// Income totals per category, largest first.
+  List<CategorySpending> incomeByCategory(
+          List<TransactionModel> transactions) =>
+      categoryTotals(transactions, TransactionType.income);
+
+  List<CategorySpending> categoryTotals(
+      List<TransactionModel> transactions, TransactionType type) {
     final amounts = <String, double>{};
     final meta = <String, (String, String, String)>{};
     for (final tx in transactions) {
-      if (tx.txType != TransactionType.expense) continue;
+      if (tx.txType != type) continue;
       amounts[tx.categoryId] = (amounts[tx.categoryId] ?? 0) + tx.amount;
       meta[tx.categoryId] ??= (
         tx.categoryName ?? 'Unknown',

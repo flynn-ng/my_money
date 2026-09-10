@@ -298,6 +298,58 @@ void main() {
           isNot(contains('Lương')));
     });
 
+    test('income is ranked on its own side instead of being dropped', () {
+      final summary = summarise([
+        _tx(
+            amount: 9000000,
+            date: DateTime(2026, 9, 8),
+            type: 'income',
+            categoryId: 'salary',
+            categoryName: 'Lương',
+            categoryIcon: '💰'),
+        _tx(
+            amount: 500000,
+            date: DateTime(2026, 9, 9),
+            type: 'income',
+            categoryId: 'gift',
+            categoryName: 'Được tặng'),
+        ...spread(),
+      ]);
+
+      expect(summary.incomeCategories.map((c) => c.categoryName).toList(),
+          ['Lương', 'Được tặng']);
+      expect(summary.incomeCategories.first.amount, 9000000);
+      expect(summary.incomeCategories.first.categoryIcon, '💰');
+      // Four expense categories plus the two income ones.
+      expect(summary.categoryCount, 6);
+    });
+
+    test('a week with no income lists none', () {
+      final summary = summarise(spread());
+
+      expect(summary.incomeCategories, isEmpty);
+      expect(summary.categoryCount, 4);
+    });
+
+    test('an income category can be selected like any other', () {
+      final summary = summarise(
+        [
+          _tx(
+              amount: 9000000,
+              date: DateTime(2026, 9, 8),
+              type: 'income',
+              categoryId: 'salary',
+              categoryName: 'Lương'),
+          ...spread(),
+        ],
+        categoryIds: {'salary'},
+      );
+
+      expect(summary.income, 9000000);
+      expect(summary.expense, 0);
+      expect(summary.filteredCategories.single.categoryName, 'Lương');
+    });
+
     group('category filter', () {
       test('narrows the week total to the chosen category', () {
         final summary = summarise(spread(), categoryIds: {'food'});

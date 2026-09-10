@@ -40,6 +40,11 @@ class WeeklySummary {
   /// and expands to the rest on demand, so nothing is dropped here.
   final List<CategorySpending> categories;
 
+  /// Income categories of the week, largest first — the other half of "all
+  /// categories", and the only thing on the card that can account for the
+  /// income total.
+  final List<CategorySpending> incomeCategories;
+
   /// Categories the totals above are restricted to; empty means the whole week.
   /// [categories] always covers the unfiltered week, so the list the user picks
   /// from does not collapse to what they picked.
@@ -57,15 +62,19 @@ class WeeklySummary {
     required this.days,
     required this.categories,
     required this.elapsedDays,
+    this.incomeCategories = const [],
     this.categoryFilters = const {},
   });
 
+  /// Everything listable under "all categories", both directions.
+  int get categoryCount => categories.length + incomeCategories.length;
+
   bool get isFiltered => categoryFilters.isNotEmpty;
 
-  /// The selected categories, in the same order as [categories], skipping any
-  /// that had no spending this week.
+  /// The selected categories, expense first then income, skipping any that had
+  /// no transactions this week.
   List<CategorySpending> get filteredCategories => [
-        for (final category in categories)
+        for (final category in [...categories, ...incomeCategories])
           if (categoryFilters.contains(category.categoryId)) category,
       ];
 
@@ -168,6 +177,7 @@ class WeeklySummaryRepository {
           ),
       ],
       categories: _reports.spendingByCategory(thisWeek),
+      incomeCategories: _reports.incomeByCategory(thisWeek),
       elapsedDays: _elapsedDays(start, today),
       categoryFilters: categoryIds,
     );
