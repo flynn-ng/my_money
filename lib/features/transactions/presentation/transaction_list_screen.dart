@@ -56,6 +56,7 @@ class _TransactionListBodyState extends ConsumerState<TransactionListBody> {
       await Future.delayed(const Duration(milliseconds: 150));
     } else {
       ref.invalidate(transactionsProvider);
+      ref.read(transactionsRevisionProvider.notifier).bump();
       await ref.read(transactionsProvider.future);
     }
   }
@@ -554,6 +555,7 @@ class _TransactionListState extends ConsumerState<_TransactionList> {
                         .read(transactionRepositoryProvider)
                         .deleteTransaction(tx.id);
                     ref.invalidate(transactionsProvider);
+                    ref.read(transactionsRevisionProvider.notifier).bump();
                   },
                 ).animate(delay: Duration(milliseconds: (i * 30 + j * 20).clamp(0, 400)))
                     .fadeIn(duration: 250.ms)

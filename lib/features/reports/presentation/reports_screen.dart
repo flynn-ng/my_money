@@ -10,10 +10,12 @@ import '../../../core/widgets/error_display.dart';
 import '../../../core/widgets/loading_overlay.dart';
 import '../../transactions/data/transaction_repository.dart';
 import '../data/reports_repository.dart';
+import '../data/weekly_summary_repository.dart';
 import 'widgets/category_pie_chart.dart';
 import 'widgets/export_csv_button.dart';
 import 'widgets/monthly_bar_chart.dart';
 import 'widgets/monthly_summary_card.dart';
+import 'widgets/weekly_summary_card.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -33,6 +35,7 @@ class ReportsScreen extends ConsumerWidget {
           onRefresh: () async {
             ref.invalidate(transactionsProvider);
             ref.invalidate(last6MonthsProvider);
+            ref.invalidate(weeklySummaryProvider);
           },
           child: CustomScrollView(
             slivers: [
@@ -74,6 +77,7 @@ class ReportsScreen extends ConsumerWidget {
                   data: (totals) => MonthlySummaryCard(totals: totals),
                 ),
               ),
+              const SliverToBoxAdapter(child: WeeklySummarySection()),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(hPad(context), 16, hPad(context), 8),
