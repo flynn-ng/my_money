@@ -117,7 +117,10 @@ class S {
       _t('Xem tất cả ($count)', 'Show all ($count)');
   static String get weekShowLess => _t('Thu gọn', 'Show less');
   static String get weekFilterHint =>
-      _t('Chỉ tính danh mục này', 'Counting this category only');
+      _t('Chỉ tính mục đã chọn', 'Selected only');
+  static String weekFilterCount(int count) =>
+      _t('$count danh mục', '$count categories');
+  static String get weekFilterClear => _t('Bỏ chọn', 'Clear');
   static List<String> get weekdayShort => activeLocale == 'en'
       ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       : const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];

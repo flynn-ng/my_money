@@ -37,14 +37,14 @@ void main() {
     List<TransactionModel> transactions, {
     DateTime? weekStart,
     DateTime? today,
-    String? categoryId,
+    Set<String> categoryIds = const {},
   }) =>
       repo.summarise(
         transactions: transactions,
         weekStart: weekStart ?? _monday,
         // A finished week unless a test says otherwise.
         today: today ?? DateTime(2026, 9, 20),
-        categoryId: categoryId,
+        categoryIds: categoryIds,
       );
 
   group('week boundaries', () {
@@ -300,21 +300,40 @@ void main() {
 
     group('category filter', () {
       test('narrows the week total to the chosen category', () {
-        final summary = summarise(spread(), categoryId: 'food');
+        final summary = summarise(spread(), categoryIds: {'food'});
 
         expect(summary.expense, 600); // 100 + 500, not the 1500 of the week
       });
 
       test('keeps the full ranking so the filter can be changed or cleared', () {
-        final summary = summarise(spread(), categoryId: 'food');
+        final summary = summarise(spread(), categoryIds: {'food'});
 
         expect(summary.categories.length, 4);
-        expect(summary.categoryFilter, 'food');
-        expect(summary.filteredCategory?.categoryName, 'Ăn uống');
+        expect(summary.categoryFilters, {'food'});
+        expect(summary.isFiltered, isTrue);
+        expect(summary.isSelected('food'), isTrue);
+        expect(summary.isSelected('ride'), isFalse);
+        expect(summary.filteredCategories.single.categoryName, 'Ăn uống');
+      });
+
+      test('several categories add up together', () {
+        final summary = summarise(spread(), categoryIds: {'food', 'ride'});
+
+        expect(summary.expense, 1000); // 600 food + 400 ride
+        expect(summary.days[2].expense, 400); // the ride day now counts
+        expect(summary.filteredCategories.map((c) => c.categoryName).toList(),
+            ['Ăn uống', 'Đi lại']);
+      });
+
+      test('selecting every category matches the unfiltered week', () {
+        final all = {'food', 'ride', 'fun', 'home'};
+        final summary = summarise(spread(), categoryIds: all);
+
+        expect(summary.expense, summarise(spread()).expense);
       });
 
       test('narrows the day bars too', () {
-        final summary = summarise(spread(), categoryId: 'food');
+        final summary = summarise(spread(), categoryIds: {'food'});
 
         // Mon 100 and Tue 500 are the food days; the rest belong to others.
         expect(summary.days[0].expense, 100);
@@ -339,27 +358,31 @@ void main() {
               categoryName: 'Đi lại'),
         ];
 
-        expect(summarise(transactions, categoryId: 'food').previousExpense, 250);
+        expect(summarise(transactions, categoryIds: {'food'}).previousExpense, 250);
         expect(summarise(transactions).previousExpense, 10249);
       });
 
       test('a category with nothing this week reports zero, not the week total',
           () {
-        final summary = summarise(spread(), categoryId: 'nothing-here');
+        final summary = summarise(spread(), categoryIds: {'nothing-here'});
 
         expect(summary.expense, 0);
         expect(summary.isEmpty, isTrue);
         // Still listable, so the user can get back out of the filter.
         expect(summary.categories, isNotEmpty);
-        expect(summary.filteredCategory, isNull);
+        expect(summary.isFiltered, isTrue);
+        // Nothing to name in the bar, but the selection still stands.
+        expect(summary.filteredCategories, isEmpty);
+        expect(summary.categoryFilters, {'nothing-here'});
       });
 
       test('no filter leaves every total untouched', () {
         final summary = summarise(spread());
 
         expect(summary.expense, 1500);
-        expect(summary.categoryFilter, isNull);
-        expect(summary.filteredCategory, isNull);
+        expect(summary.categoryFilters, isEmpty);
+        expect(summary.isFiltered, isFalse);
+        expect(summary.filteredCategories, isEmpty);
       });
     });
   });

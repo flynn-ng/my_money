@@ -12,7 +12,7 @@ WeeklySummary _summary({
   double previousExpense = 2000000,
   List<CategorySpending> categories = const [],
   int elapsedDays = 7,
-  String? categoryFilter,
+  Set<String> categoryFilters = const {},
 }) =>
     WeeklySummary(
       weekStart: _monday,
@@ -29,7 +29,7 @@ WeeklySummary _summary({
       ],
       categories: categories,
       elapsedDays: elapsedDays,
-      categoryFilter: categoryFilter,
+      categoryFilters: categoryFilters,
     );
 
 const _categories = [
@@ -61,6 +61,7 @@ Future<void> _pump(
   double width = 390,
   ThemeData? theme,
   void Function(String categoryId)? onCategoryTap,
+  VoidCallback? onClearFilters,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1.0;
@@ -73,6 +74,7 @@ Future<void> _pump(
         child: WeeklySummaryCard(
           summary: summary,
           onCategoryTap: onCategoryTap,
+          onClearFilters: onClearFilters,
         ),
       ),
     ),
@@ -195,21 +197,75 @@ void main() {
       expect(tapped, ['ride']);
     });
 
-    testWidgets('a filtered week shows the chip and clears from it',
+    testWidgets('rows carry a checkbox only when they can be selected',
         (tester) async {
+      await _pump(tester, _summary(categories: _categories));
+      expect(find.byType(Checkbox), findsNothing);
+
+      await _pump(
+        tester,
+        _summary(categories: _categories),
+        onCategoryTap: (_) {},
+      );
+      expect(find.byType(Checkbox), findsNWidgets(3));
+    });
+
+    testWidgets('the checkbox reflects what is selected', (tester) async {
+      await _pump(
+        tester,
+        _summary(categories: _categories, categoryFilters: {'food', 'fun'}),
+        onCategoryTap: (_) {},
+      );
+
+      final boxes = tester
+          .widgetList<Checkbox>(find.byType(Checkbox))
+          .map((c) => c.value)
+          .toList();
+      expect(boxes, [true, false, true]); // Ăn uống, Đi lại, Giải trí
+    });
+
+    testWidgets('ticking the box reports the category', (tester) async {
       final tapped = <String>[];
       await _pump(
         tester,
-        _summary(categories: _categories, categoryFilter: 'food'),
+        _summary(categories: _categories),
         onCategoryTap: tapped.add,
       );
 
-      expect(find.text('Chỉ tính danh mục này'), findsOneWidget);
-
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byType(Checkbox).at(2));
       await tester.pumpAndSettle();
 
-      expect(tapped, ['food']);
+      expect(tapped, ['fun']);
+    });
+
+    testWidgets('one selected category is named in the filter bar',
+        (tester) async {
+      await _pump(
+        tester,
+        _summary(categories: _categories, categoryFilters: {'food'}),
+        onCategoryTap: (_) {},
+      );
+
+      expect(find.text('🍜 Ăn uống'), findsOneWidget);
+      expect(find.text('Chỉ tính mục đã chọn'), findsOneWidget);
+    });
+
+    testWidgets('several selected categories are counted, and clear together',
+        (tester) async {
+      var cleared = 0;
+      await _pump(
+        tester,
+        _summary(categories: _categories, categoryFilters: {'food', 'ride'}),
+        onCategoryTap: (_) {},
+        onClearFilters: () => cleared++,
+      );
+
+      expect(find.text('2 danh mục'), findsOneWidget);
+
+      await tester.tap(find.text('Bỏ chọn'));
+      await tester.pumpAndSettle();
+
+      expect(cleared, 1);
     });
 
     testWidgets('an empty category filter still lists the categories',
@@ -221,7 +277,7 @@ void main() {
           expense: 0,
           previousExpense: 0,
           categories: _categories,
-          categoryFilter: 'food',
+          categoryFilters: {'food'},
         ),
       );
 
