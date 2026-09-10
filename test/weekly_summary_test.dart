@@ -37,12 +37,14 @@ void main() {
     List<TransactionModel> transactions, {
     DateTime? weekStart,
     DateTime? today,
+    String? categoryId,
   }) =>
       repo.summarise(
         transactions: transactions,
         weekStart: weekStart ?? _monday,
         // A finished week unless a test says otherwise.
         today: today ?? DateTime(2026, 9, 20),
+        categoryId: categoryId,
       );
 
   group('week boundaries', () {
@@ -119,7 +121,7 @@ void main() {
       final summary = summarise([]);
       expect(summary.isEmpty, isTrue);
       expect(summary.days.every((d) => d.income == 0 && d.expense == 0), isTrue);
-      expect(summary.topCategories, isEmpty);
+      expect(summary.categories, isEmpty);
     });
 
     test('income alone does not count as an empty week', () {
@@ -255,14 +257,15 @@ void main() {
               categoryName: 'Nhà cửa'),
         ];
 
-    test('ranks categories by spend and keeps only the top three', () {
+    test('ranks every category by spend, largest first', () {
       final summary = summarise(spread());
 
-      expect(summary.topCategories.length, 3);
-      expect(summary.topCategories.map((c) => c.categoryName).toList(),
-          ['Ăn uống', 'Đi lại', 'Giải trí']);
-      expect(summary.topCategories.first.amount, 600);
-      expect(summary.topCategories.first.categoryIcon, '🍜');
+      // All of them: the card decides how many to show, not the summary.
+      expect(summary.categories.length, 4);
+      expect(summary.categories.map((c) => c.categoryName).toList(),
+          ['Ăn uống', 'Đi lại', 'Giải trí', 'Nhà cửa']);
+      expect(summary.categories.first.amount, 600);
+      expect(summary.categories.first.categoryIcon, '🍜');
     });
 
     test('only this week feeds the ranking', () {
@@ -275,7 +278,7 @@ void main() {
             categoryName: 'Tuần trước'),
       ]);
 
-      expect(summary.topCategories.map((c) => c.categoryName),
+      expect(summary.categories.map((c) => c.categoryName),
           isNot(contains('Tuần trước')));
     });
 
@@ -291,8 +294,73 @@ void main() {
       ]);
 
       expect(summary.income, 9000000);
-      expect(summary.topCategories.map((c) => c.categoryName),
+      expect(summary.categories.map((c) => c.categoryName),
           isNot(contains('Lương')));
+    });
+
+    group('category filter', () {
+      test('narrows the week total to the chosen category', () {
+        final summary = summarise(spread(), categoryId: 'food');
+
+        expect(summary.expense, 600); // 100 + 500, not the 1500 of the week
+      });
+
+      test('keeps the full ranking so the filter can be changed or cleared', () {
+        final summary = summarise(spread(), categoryId: 'food');
+
+        expect(summary.categories.length, 4);
+        expect(summary.categoryFilter, 'food');
+        expect(summary.filteredCategory?.categoryName, 'Ăn uống');
+      });
+
+      test('narrows the day bars too', () {
+        final summary = summarise(spread(), categoryId: 'food');
+
+        // Mon 100 and Tue 500 are the food days; the rest belong to others.
+        expect(summary.days[0].expense, 100);
+        expect(summary.days[1].expense, 500);
+        expect(summary.days[2].expense, 0);
+        expect(summary.days[3].expense, 0);
+      });
+
+      test('compares against the same category last week, not the whole week',
+          () {
+        final transactions = [
+          ...spread(),
+          _tx(
+              amount: 250,
+              date: DateTime(2026, 9, 3),
+              categoryId: 'food',
+              categoryName: 'Ăn uống'),
+          _tx(
+              amount: 9999,
+              date: DateTime(2026, 9, 4),
+              categoryId: 'ride',
+              categoryName: 'Đi lại'),
+        ];
+
+        expect(summarise(transactions, categoryId: 'food').previousExpense, 250);
+        expect(summarise(transactions).previousExpense, 10249);
+      });
+
+      test('a category with nothing this week reports zero, not the week total',
+          () {
+        final summary = summarise(spread(), categoryId: 'nothing-here');
+
+        expect(summary.expense, 0);
+        expect(summary.isEmpty, isTrue);
+        // Still listable, so the user can get back out of the filter.
+        expect(summary.categories, isNotEmpty);
+        expect(summary.filteredCategory, isNull);
+      });
+
+      test('no filter leaves every total untouched', () {
+        final summary = summarise(spread());
+
+        expect(summary.expense, 1500);
+        expect(summary.categoryFilter, isNull);
+        expect(summary.filteredCategory, isNull);
+      });
     });
   });
 }

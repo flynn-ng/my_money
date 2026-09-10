@@ -36,8 +36,14 @@ class WeeklySummary {
   /// Always seven entries, Monday first.
   final List<DailyTotal> days;
 
-  /// Biggest expense categories of the week, largest first.
-  final List<CategorySpending> topCategories;
+  /// Every expense category of the week, largest first. The card shows a few
+  /// and expands to the rest on demand, so nothing is dropped here.
+  final List<CategorySpending> categories;
+
+  /// Category the totals above are restricted to, or null for the whole week.
+  /// [categories] always covers the unfiltered week, so the list the user picks
+  /// from does not collapse to the one they picked.
+  final String? categoryFilter;
 
   /// Days of the week that have actually happened: 7 for a finished week,
   /// 1-7 for the running one, 0 for a week that has not started yet.
@@ -49,9 +55,19 @@ class WeeklySummary {
     required this.expense,
     required this.previousExpense,
     required this.days,
-    required this.topCategories,
+    required this.categories,
     required this.elapsedDays,
+    this.categoryFilter,
   });
+
+  /// The category the numbers are currently restricted to, if any.
+  CategorySpending? get filteredCategory {
+    if (categoryFilter == null) return null;
+    for (final category in categories) {
+      if (category.categoryId == categoryFilter) return category;
+    }
+    return null;
+  }
 
   DateTime get weekEnd => weekStart.addDays(6);
 
@@ -80,7 +96,7 @@ class WeeklySummaryRepository {
   final ReportsRepository _reports;
   const WeeklySummaryRepository(this._reports);
 
-  /// How many categories the card lists.
+  /// How many categories the card lists before "show all".
   static const topCategoryCount = 3;
 
   /// Builds the summary for the week containing [weekStart].
@@ -88,10 +104,16 @@ class WeeklySummaryRepository {
   /// [transactions] is expected to cover that week *and* the one before it;
   /// anything else is ignored. [today] decides how much of the week has already
   /// happened.
+  ///
+  /// [categoryId] narrows every total — the week's spend, the day bars, the
+  /// income and the last-week baseline — to one category, so the comparison
+  /// stays like-for-like. The category ranking itself is always computed from
+  /// the whole week.
   WeeklySummary summarise({
     required List<TransactionModel> transactions,
     required DateTime weekStart,
     required DateTime today,
+    String? categoryId,
   }) {
     final start = weekStart.weekStart;
     final previousStart = start.addDays(-7);
@@ -104,19 +126,25 @@ class WeeklySummaryRepository {
     final thisWeek = <TransactionModel>[];
     var previousExpense = 0.0;
 
+    bool matchesFilter(TransactionModel tx) =>
+        categoryId == null || tx.categoryId == categoryId;
+
     for (final tx in transactions) {
       final day = DateTime(tx.date.year, tx.date.month, tx.date.day);
       final slot = slotOfDay[_dayKey(day)];
       if (slot == null) {
         // Outside the week: only last week's expenses matter, as the baseline.
         if (tx.txType == TransactionType.expense &&
+            matchesFilter(tx) &&
             !day.isBefore(previousStart) &&
             day.isBefore(start)) {
           previousExpense += tx.amount;
         }
         continue;
       }
+      // The ranking is built from the whole week even while a filter is on.
       thisWeek.add(tx);
+      if (!matchesFilter(tx)) continue;
       if (tx.txType == TransactionType.income) {
         incomeByDay[slot] += tx.amount;
       } else {
@@ -137,9 +165,9 @@ class WeeklySummaryRepository {
             expense: expenseByDay[i],
           ),
       ],
-      topCategories:
-          _reports.spendingByCategory(thisWeek).take(topCategoryCount).toList(),
+      categories: _reports.spendingByCategory(thisWeek),
       elapsedDays: _elapsedDays(start, today),
+      categoryFilter: categoryId,
     );
   }
 
@@ -173,8 +201,29 @@ class SelectedWeekNotifier extends Notifier<DateTime> {
 final selectedWeekProvider =
     NotifierProvider<SelectedWeekNotifier, DateTime>(SelectedWeekNotifier.new);
 
+/// Category the week card is narrowed to, or null for the whole week.
+class WeekCategoryFilterNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    // A category that was busy this week may not exist in the next one, and a
+    // card silently showing zeros reads as a bug — so moving weeks clears it.
+    ref.listen(selectedWeekProvider, (_, _) => state = null);
+    return null;
+  }
+
+  void toggle(String categoryId) =>
+      state = state == categoryId ? null : categoryId;
+
+  void clear() => state = null;
+}
+
+final weekCategoryFilterProvider =
+    NotifierProvider<WeekCategoryFilterNotifier, String?>(
+        WeekCategoryFilterNotifier.new);
+
 final weeklySummaryProvider = FutureProvider<WeeklySummary>((ref) async {
   final week = ref.watch(selectedWeekProvider);
+  final categoryId = ref.watch(weekCategoryFilterProvider);
   final repo = ref.watch(weeklySummaryRepositoryProvider);
   final now = DateTime.now();
 
@@ -185,7 +234,12 @@ final weeklySummaryProvider = FutureProvider<WeeklySummary>((ref) async {
 
   final profile = await ref.watch(currentProfileProvider.future);
   if (profile?.householdId == null) {
-    return repo.summarise(transactions: const [], weekStart: week, today: now);
+    return repo.summarise(
+      transactions: const [],
+      weekStart: week,
+      today: now,
+      categoryId: categoryId,
+    );
   }
   final householdId = profile!.householdId!;
   final txRepo = ref.watch(transactionRepositoryProvider);
@@ -205,5 +259,6 @@ final weeklySummaryProvider = FutureProvider<WeeklySummary>((ref) async {
     transactions: transactions,
     weekStart: week,
     today: now,
+    categoryId: categoryId,
   );
 });
